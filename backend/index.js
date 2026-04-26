@@ -13,7 +13,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: ["https://mellow-smakager-a976e5.netlify.app", "http://localhost:5173", "http://localhost:3000"],
+  origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
@@ -162,7 +162,7 @@ app.post("/api/detect", upload.single("image"), async (req, res) => {
         Authorization: `Bearer ${process.env.OPENROUTER_KEY}`,
       },
       body: JSON.stringify({
-        model: "openai/gpt-4o-mini", 
+        model: "openai/gpt-4o-mini",
         messages: [
           {
             role: "user",
