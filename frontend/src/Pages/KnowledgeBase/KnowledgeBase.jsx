@@ -120,7 +120,7 @@ export default function KnowledgeBase() {
       readTime: "12 min",
       excerpt: "Using crops like Dhaincha to restore soil nitrogen without chemical fertilizers.",
       tags: ["GreenManure", "SoilHealth", "Organic"],
-      image: "/assets/ag7.png",
+      image: "src/assets/ag7.png",
       url: "https://krishijagran.com/agriculture-world/earthworms-can-enrich-soil-far-more-quickly-than-previously-imagined/"
     },
     { id: 104, title: "Bio-Fertilizers vs Chemical: Why Organic Wins", category: "Organic Farming", author: "Dr. S. Singh", readTime: "15 min", excerpt: "A detailed scientific comparison of long-term soil productivity.", tags: ["Science", "Organic"] },
