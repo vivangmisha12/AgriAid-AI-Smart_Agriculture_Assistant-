@@ -22,6 +22,7 @@ import { Toaster as SonnerToaster } from 'sonner'
 
 
 import SplashScreen from './components/SplashScreen.jsx'
+import ScrollLoginPopup from './components/ScrollLoginPopup.jsx'
 
 function App() {
   const [showSplash, setShowSplash] = React.useState(true);
@@ -34,6 +35,7 @@ function App() {
     <Router>
       <div className="min-h-screen bg-[#FCF9F1] flex flex-col">
         <Header />
+        <ScrollLoginPopup />
         <Toaster position="top-right" reverseOrder={false} />
         <SonnerToaster position="top-center" />
         <div className="flex-grow">

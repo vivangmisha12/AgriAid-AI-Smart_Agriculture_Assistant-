@@ -139,43 +139,47 @@ export default function ExpertSuggestions() {
 
   const quickGuides = [
     {
-      title: "Seed Selection Guide",
-      description: "How to choose the right variety for your region",
+      title: "Seed Selection and Quality Guide",
+      description: "Official government guide on choosing certified seeds and varieties.",
       duration: "5 min read",
-      category: "Basics"
+      category: "Basics",
+      link: "https://data.vikaspedia.in/short/lc?k=Zxgr0286rs9XvTxyC4NKug"
     },
     {
-      title: "Soil Health Assessment",
-      description: "Simple techniques to test soil fertility at home",
+      title: "Soil Health Portal and Card ",
+      description: "Check your soil health card status and get expert recommendations.",
       duration: "8 min read",
-      category: "Soil"
+      category: "Soil",
+      link: "https://data.vikaspedia.in/short/lc?k=684UzG430CefhHsURRTSXQ"
     },
     {
-      title: "Organic Fertilizer Preparation",
-      description: "Step-by-step guide to making compost and vermicompost",
+      title: "Organic Farming Guide",
+      description: "Comprehensive step-by-step guide to Jaivik Kheti from Vikaspedia.",
       duration: "10 min read",
-      category: "Organic"
+      category: "Organic",
+      link: "https://data.vikaspedia.in/short/lc?k=VfZnMGEEWJjSlT1QcMkOcg"
     },
     {
-      title: "Drip Irrigation Setup",
-      description: "Cost-effective drip irrigation for small farms",
+      title: "Pradhan Mantri KISAN Samman Nidhi ",
+      description: "Know about government benefits and financial assistance schemes.",
       duration: "12 min read",
-      category: "Water"
+      category: "Schemes",
+      link: "https://data.vikaspedia.in/short/lc?k=8LMdDF3rc83dZQdGiWwvKA"
     },
   ];
 
   const filteredSuggestions = suggestions.filter(suggestion => {
     const matchesSeason = selectedSeason === "all" || suggestion.season === selectedSeason || suggestion.season === "All";
-    const matchesSearch = suggestion.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         suggestion.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         suggestion.category.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = suggestion.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      suggestion.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      suggestion.category.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSeason && matchesSearch;
   });
 
   const handleShare = async (tip) => {
     const shareText = "Check out this farming tip from AgriAid AI: ";
     const text = `${shareText}\n\n*${tip.title}*\n${tip.description}\n\nShared via AgriAid AI`;
-    
+
     if (navigator.share) {
       try {
         await navigator.share({
@@ -218,7 +222,7 @@ export default function ExpertSuggestions() {
               Get personalized farming tips and best practices from agricultural experts
             </p>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <Button className="rounded-full bg-green-600 hover:bg-green-700 shadow-md">
               Ask an Expert
@@ -226,65 +230,38 @@ export default function ExpertSuggestions() {
           </div>
         </div>
 
-        {/* Search and Filters */}
-        <div className="grid lg:grid-cols-3 gap-6 mb-8 animate-fade-in-up animate-delay-100">
-          <div className="lg:col-span-2 relative">
+        {/* Search Bar */}
+        <div className="max-w-4xl mx-auto mb-8 animate-fade-in-up animate-delay-100">
+          <div className="relative">
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-gray-400" />
             </div>
             <input
               type="text"
               placeholder="Search for tips, crops, or techniques..."
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white/50 backdrop-blur-sm focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all shadow-sm"
+              className="w-full pl-10 pr-4 py-4 rounded-2xl border border-gray-200 bg-white/50 backdrop-blur-sm focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all shadow-sm text-lg"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <Select value={selectedCrop} onValueChange={setSelectedCrop}>
-              <SelectTrigger className="bg-white/50 backdrop-blur-sm border-gray-200 rounded-xl h-full shadow-sm">
-                <SelectValue placeholder="Select Your Crop" />
-              </SelectTrigger>
-              <SelectContent className="bg-white border-gray-200">
-                {crops.map(crop => (
-                  <SelectItem key={crop.value} value={crop.value}>
-                    {crop.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={selectedSeason} onValueChange={setSelectedSeason}>
-              <SelectTrigger className="bg-white/50 backdrop-blur-sm border-gray-200 rounded-xl h-full shadow-sm">
-                <SelectValue placeholder="Select Season" />
-              </SelectTrigger>
-              <SelectContent className="bg-white border-gray-200">
-                <SelectItem value="all">All Seasons</SelectItem>
-                <SelectItem value="Kharif">Kharif</SelectItem>
-                <SelectItem value="Rabi">Rabi</SelectItem>
-                <SelectItem value="Summer">Summer</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </div>
 
         <Tabs defaultValue="suggestions" className="space-y-8">
           <TabsList className="flex items-center justify-center gap-4 bg-transparent w-full border-none h-auto p-0">
-            <TabsTrigger 
-              value="suggestions" 
+            <TabsTrigger
+              value="suggestions"
               className="px-8 py-3 rounded-full text-sm font-bold transition-all data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-lg bg-white text-gray-600 border border-gray-100 hover:bg-green-50 shadow-sm"
             >
               Suggestions
             </TabsTrigger>
-            <TabsTrigger 
-              value="experts" 
+            <TabsTrigger
+              value="experts"
               className="px-8 py-3 rounded-full text-sm font-bold transition-all data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-lg bg-white text-gray-600 border border-gray-100 hover:bg-green-50 shadow-sm"
             >
               Expert Tips
             </TabsTrigger>
-            <TabsTrigger 
-              value="guides" 
+            <TabsTrigger
+              value="guides"
               className="px-8 py-3 rounded-full text-sm font-bold transition-all data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-lg bg-white text-gray-600 border border-gray-100 hover:bg-green-50 shadow-sm"
             >
               Quick Guides
@@ -293,6 +270,20 @@ export default function ExpertSuggestions() {
 
           {/* Suggestions Tab */}
           <TabsContent value="suggestions" className="space-y-6 animate-fade-in-up animate-delay-200">
+            <div className="flex flex-col md:flex-row items-end justify-between mb-2 gap-4">
+              <div>
+                <h3 className="text-2xl font-bold text-gray-800">Personalized Suggestions</h3>
+                <p className="text-gray-500">AI-powered recommendations based on your crop profile</p>
+              </div>
+              <Button 
+                variant="link" 
+                className="text-green-600 font-bold p-0"
+                onClick={() => window.open("https://icar.org.in/content/package-practices", "_blank")}
+              >
+                View All Suggestions
+              </Button>
+            </div>
+
             <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6">
               {filteredSuggestions.length > 0 ? (
                 filteredSuggestions.map((suggestion) => (
@@ -315,9 +306,9 @@ export default function ExpertSuggestions() {
                             </div>
                           </div>
                         </div>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           className="text-gray-400 hover:text-green-600 rounded-full"
                           onClick={() => handleShare(suggestion)}
                         >
@@ -392,9 +383,27 @@ export default function ExpertSuggestions() {
 
           {/* Quick Guides Tab */}
           <TabsContent value="guides" className="space-y-12 animate-fade-in-up animate-delay-200">
+            <div className="flex flex-col md:flex-row items-end justify-between mb-2 gap-4">
+              <div>
+                <h3 className="text-2xl font-bold text-gray-800">Quick Resource Guides</h3>
+                <p className="text-gray-500">Step-by-step official manuals for farmers</p>
+              </div>
+              <Button
+                variant="link"
+                className="text-green-600 font-bold p-0"
+                onClick={() => window.open("https://agriculture.vikaspedia.in/viewcontent/agriculture?lgn=en", "_blank")}
+              >
+                View Full Guide
+              </Button>
+            </div>
+
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {quickGuides.map((guide, index) => (
-                <Card key={index} className="glass-card border-none hover-scale cursor-pointer group flex flex-col">
+                <Card
+                  key={index}
+                  className="glass-card border-none hover-scale cursor-pointer group flex flex-col"
+                  onClick={() => window.open(guide.link, "_blank")}
+                >
                   <CardHeader className="pb-4">
                     <div className="flex items-center justify-between mb-4">
                       <Badge className="bg-green-100 text-green-700 border-none">{guide.category}</Badge>
@@ -406,6 +415,9 @@ export default function ExpertSuggestions() {
                   </CardHeader>
                   <CardContent className="mt-auto">
                     <p className="text-gray-500 text-sm mb-6 line-clamp-3">{guide.description}</p>
+                    <div className="flex items-center text-xs font-bold text-green-600 group-hover:translate-x-1 transition-transform">
+                      Read Official Guide <ArrowRight className="ml-1 w-3 h-3" />
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -417,26 +429,48 @@ export default function ExpertSuggestions() {
                   <h3 className="text-2xl font-bold text-gray-800">Video Tutorials</h3>
                   <p className="text-gray-500">Visual guides for common farming practices</p>
                 </div>
-                <Button variant="link" className="text-green-600 font-bold p-0">View All Videos</Button>
+                <Button
+                  variant="link"
+                  className="text-green-600 font-bold p-0"
+                  onClick={() => window.open("https://www.youtube.com/@DDKisan", "_blank")}
+                >
+                  View All Videos
+                </Button>
               </div>
-              
+
               <div className="grid md:grid-cols-3 gap-6">
                 {[
-                  { title: "Drip Irrigation Setup", duration: "12:30", color: "from-blue-500 to-blue-600" },
-                  { title: "Pest Identification", duration: "08:15", color: "from-red-500 to-red-600" },
-                  { title: "Composting Basics", duration: "15:45", color: "from-amber-500 to-amber-600" }
+                  { title: "Mushroom Farming Guide", duration: "12:30", id: "cUaRrO62VVg", category: "High Profit" },
+                  { title: "Jaivik Kheti (Organic)", duration: "08:15", id: "i-LyJnjMA2Q", category: "Soil Health" },
+                  { title: "Modern Irrigation", duration: "15:45", id: "bw6zfN21ivE", category: "Water Save" }
                 ].map((video, index) => (
-                  <div key={index} className="group cursor-pointer">
-                    <div className={`aspect-video rounded-2xl bg-gradient-to-br ${video.color} relative overflow-hidden flex items-center justify-center mb-4 shadow-lg group-hover:shadow-xl transition-all`}>
-                      <div className="w-12 h-12 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <div className="w-0 h-0 border-t-[8px] border-t-transparent border-l-[14px] border-l-white border-b-[8px] border-b-transparent ml-1"></div>
+                  <div
+                    key={index}
+                    className="group cursor-pointer"
+                    onClick={() => window.open(`https://www.youtube.com/watch?v=${video.id}`, "_blank")}
+                  >
+                    <div className="aspect-video rounded-2xl bg-slate-100 relative overflow-hidden flex items-center justify-center mb-4 shadow-lg group-hover:shadow-xl transition-all border border-slate-200">
+                      {/* Thumbnail Image */}
+                      <img
+                        src={`https://img.youtube.com/vi/${video.id}/mqdefault.jpg`}
+                        alt={video.title}
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
+                      {/* Overlay */}
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+
+                      <div className="relative z-10 w-12 h-12 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center group-hover:scale-110 transition-transform border border-white/40">
+                        <div className="w-0 h-0 border-t-[8px] border-t-transparent border-l-[14px] border-l-white border-b-[8px] border-b-transparent ml-1 shadow-sm"></div>
                       </div>
-                      <div className="absolute bottom-2 right-2 bg-black/50 backdrop-blur-sm text-white text-[10px] px-2 py-1 rounded-md">
+                      <div className="absolute bottom-2 right-2 bg-black/70 backdrop-blur-sm text-white text-[10px] px-2 py-1 rounded-md font-bold">
                         {video.duration}
                       </div>
+                      <div className="absolute top-2 left-2">
+                        <Badge className="bg-green-600/90 text-white border-none text-[10px]">{video.category}</Badge>
+                      </div>
                     </div>
-                    <h4 className="text-gray-800 font-bold group-hover:text-green-600 transition-colors">{video.title}</h4>
-                    <p className="text-xs text-gray-500 mt-1">Advanced Farming Series</p>
+                    <h4 className="text-gray-800 font-bold group-hover:text-green-600 transition-colors line-clamp-1">{video.title}</h4>
+                    <p className="text-[10px] text-gray-500 mt-1 uppercase tracking-wider font-bold">DD Kisan Official</p>
                   </div>
                 ))}
               </div>

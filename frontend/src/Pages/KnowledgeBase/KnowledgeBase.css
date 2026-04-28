@@ -40,15 +40,15 @@
 .delay-300 { animation-delay: 0.3s; }
 
 .search-glow:focus-within {
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
-  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 0 0 20px rgba(22, 163, 74, 0.15);
+  border-color: rgba(22, 163, 74, 0.5);
 }
 
 .video-play-overlay {
-  background: rgba(139, 92, 246, 0.1);
+  background: rgba(22, 163, 74, 0.1);
   transition: background 0.3s ease;
 }
 
 .video-play-overlay:hover {
-  background: rgba(139, 92, 246, 0.2);
+  background: rgba(22, 163, 74, 0.2);
 }

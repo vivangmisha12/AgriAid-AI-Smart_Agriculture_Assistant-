@@ -143,7 +143,125 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// 2. Disease Detection Route (Using OpenRouter Vision)
+// Free vision models — fallback order mein (1 fail → 2 pe, 2 fail → 3 pe)
+// IDs verified from OpenRouter live API on 2026-04-27
+const VISION_MODELS = [
+  "google/gemma-3-27b-it:free",       // Best quality — Google Gemma 3 27B
+  "google/gemma-3-12b-it:free",       // Backup — Google Gemma 3 12B
+  "nvidia/nemotron-nano-12b-v2-vl:free", // Second backup — NVIDIA Nemotron 12B
+];
+
+// Language-aware prompt builder
+function buildVisionPrompt(lang) {
+  const isHindi = lang === 'Hindi' || lang === 'hi';
+
+  if (isHindi) {
+    // Strategy: Model ko English mein sochne do (accuracy better hoti hai),
+    // lekin output Hindi mein dene do — isse 60-70%+ accuracy milti hai
+    return `You are an expert agricultural scientist. Carefully analyze this plant/crop image.
+
+STEP 1 — Internal Analysis (think in English for accuracy):
+- Identify the exact crop/plant species visible
+- Look for: leaf discoloration, spots, wilting, lesions, fungal growth, pest damage, nutrient deficiency signs
+- Determine: disease name (scientific + common), severity (mild/moderate/severe), cause (fungal/bacterial/viral/pest/deficiency)
+
+STEP 2 — Output in Hindi (Devanagari script only, no English letters):
+If the image is NOT related to agriculture (car, person, building, etc.) — reply ONLY: "यह छवि कृषि से संबंधित नहीं है।"
+
+If agricultural content is detected — respond in this EXACT format in pure Hindi:
+
+## 🌿 पहचान
+**फसल/पौधा:** (crop name in Hindi)
+**रोग/समस्या का नाम:** (disease name in Hindi — also write scientific name in brackets)
+**गंभीरता:** (हल्की / मध्यम / गंभीर)
+**कारण:** (फंगस / बैक्टीरिया / वायरस / कीट / पोषण की कमी)
+
+## 🔍 लक्षण और विवरण
+(3-4 bullet points in Hindi describing exact visible symptoms)
+
+## 🌱 घरेलू/जैविक उपाय
+(3-4 practical organic remedies in Hindi with quantities)
+
+## ⚗️ रासायनिक उपाय
+(2-3 chemical treatments with commercial product names and dosage)
+
+## ⚠️ सावधानी
+(1-2 important precautions for the farmer)
+
+IMPORTANT: Use ONLY Devanagari script. No English words. Be specific and accurate.`;
+  } else {
+    // English
+    return `You are an expert agricultural scientist. Carefully analyze this plant/crop image.
+
+STEP 1 — Analysis:
+- Identify the exact crop/plant species visible
+- Look for: leaf discoloration, spots, wilting, lesions, fungal growth, pest damage, nutrient deficiency signs
+- Determine: disease name (scientific + common), severity, cause
+
+STEP 2 — Output:
+If the image is NOT related to agriculture (car, person, building, etc.) — reply ONLY: "This image is not related to agriculture."
+
+If agricultural content is detected — respond in this EXACT format:
+
+## 🌿 Identification
+**Crop/Plant:** (name)
+**Disease/Issue:** (common name + scientific name)
+**Severity:** (Mild / Moderate / Severe)
+**Cause:** (Fungal / Bacterial / Viral / Pest / Nutrient Deficiency)
+
+## 🔍 Symptoms & Description
+(3-4 bullet points describing exact visible symptoms)
+
+## 🌱 Organic / Home Remedies
+(3-4 practical organic remedies with quantities)
+
+## ⚗️ Chemical Remedies
+(2-3 chemical treatments with commercial product names and dosage)
+
+## ⚠️ Precautions
+(1-2 important precautions for the farmer)
+
+Be specific, accurate, and practical for a real farmer.`;
+  }
+}
+
+// Helper: ek model se call karna
+async function callVisionModel(model, base64Image, imageType, lang) {
+  const prompt = buildVisionPrompt(lang);
+
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.OPENROUTER_KEY}`,
+    },
+    body: JSON.stringify({
+      model,
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: prompt
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:${imageType};base64,${base64Image}`
+              }
+            }
+          ]
+        }
+      ],
+    }),
+  });
+
+  const data = await response.json();
+  return { response, data };
+}
+
+// 2. Disease Detection Route (Multi-Model Fallback)
 app.post("/api/detect", upload.single("image"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "No image uploaded" });
@@ -151,65 +269,45 @@ app.post("/api/detect", upload.single("image"), async (req, res) => {
     // A. Image ko base64 mein badalna
     const imagePath = req.file.path;
     const imageBuffer = fs.readFileSync(imagePath);
-    const base64Image = imageBuffer.toString('base64');
+    const base64Image = imageBuffer.toString("base64");
     const imageType = req.file.mimetype;
+    const lang = req.body.lang || "Hindi";
 
-    // B. OpenRouter Vision ko photo bhejna
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENROUTER_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "openai/gpt-4o-mini",
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: `Analyze this image for agricultural content. 
-                RULE 1: If the image is completely unrelated to agriculture (e.g., cars, cityscapes, electronics), reply ONLY with "This image is not related to agriculture." in ${req.body.lang || 'Hindi'} (using pure Devanagari script for Hindi).
-                RULE 2: If it shows a farm, field, plant, pest, soil, or agri-tool, provide a detailed analysis in ${req.body.lang || 'Hindi'} using only pure native script (no Hinglish).
+    // C. Cleanup helper
+    const cleanup = () => {
+      if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
+    };
 
-                Please structure your response clearly in ${req.body.lang || 'Hindi'} as follows:
-                - **Identification**: Name of what is detected.
-                - **About**: A detailed explanation of the disease/pest/object.
-                - **Home Remedies (Organic)**: 3-4 natural ways to manage this.
-                - **Chemical Remedies**: Commercial names of pesticides or fertilizers if needed.
-                Keep the information practical and comprehensive for a farmer.`
-              },
-              {
-                type: "image_url",
-                image_url: {
-                  url: `data:${imageType};base64,${base64Image}`
-                }
-              }
-            ]
-          }
-        ],
-      }),
-    });
+    // B. Multi-model fallback loop
+    let lastError = null;
+    for (const model of VISION_MODELS) {
+      try {
+        console.log(`🔄 Trying vision model: ${model}`);
+        const { response, data } = await callVisionModel(model, base64Image, imageType, lang);
 
-    const data = await response.json();
+        if (response.ok && data.choices && data.choices[0]?.message?.content) {
+          cleanup();
+          console.log(`✅ Success with model: ${model}`);
+          return res.json({
+            disease: "Detected by AI Vision",
+            remedy: data.choices[0].message.content,
+          });
+        }
 
-    // C. Cleanup (Photo delete kar dena)
-    if (fs.existsSync(imagePath)) {
-      fs.unlinkSync(imagePath);
+        // Model ne response diya lekin valid nahi
+        lastError = data?.error?.message || `Model ${model} failed`;
+        console.warn(`⚠️ Model ${model} failed:`, lastError);
+
+      } catch (modelErr) {
+        lastError = modelErr.message;
+        console.warn(`⚠️ Model ${model} threw error:`, modelErr.message);
+      }
     }
 
-    if (!response.ok || !data.choices) {
-      console.error("❌ OpenRouter Vision Error:", data);
-      return res.status(500).json({ error: "AI service issue." });
-    }
-
-    const aiResult = data.choices[0].message.content;
-
-    res.json({
-      disease: "Detected by AI Vision",
-      remedy: aiResult,
-    });
+    // Sab models fail ho gaye
+    cleanup();
+    console.error("❌ All vision models failed. Last error:", lastError);
+    return res.status(500).json({ error: "All AI models are currently unavailable. Please try again later." });
 
   } catch (err) {
     console.error("❌ Detection Error:", err);

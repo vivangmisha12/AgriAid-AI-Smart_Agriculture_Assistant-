@@ -186,22 +186,62 @@ export default function HomePage() {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-24 bg-white/50 backdrop-blur-md border-y border-slate-100">
-        <div className="container mx-auto px-4 md:px-6">
-          <div ref={howItWorksHeaderRef} className={`text-center mb-20 fade-in-up ${isHowItWorksHeaderVisible ? 'fade-in-visible' : ''}`}>
-            <h2 className="text-4xl font-black text-slate-800 mb-4">Simple 3-Step Process</h2>
-            <p className="text-slate-500 font-medium">Getting started with AgriAid is easier than ever</p>
+      <section className="py-24 bg-white/50 backdrop-blur-md border-y border-slate-100 relative overflow-hidden">
+        {/* Background Decorative Element */}
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-green-50 rounded-full blur-3xl opacity-50"></div>
+        
+        <div className="container mx-auto px-4 md:px-6 relative z-10">
+          <div ref={howItWorksHeaderRef} className={`text-center mb-24 fade-in-up ${isHowItWorksHeaderVisible ? 'fade-in-visible' : ''}`}>
+            <Badge className="bg-green-100 text-green-700 border-none px-4 py-1.5 rounded-full font-bold mb-4 uppercase tracking-wider text-[10px]">
+              How it works
+            </Badge>
+            <h2 className="text-4xl md:text-5xl font-black text-slate-800 mb-4">Simple 3-Step Process</h2>
+            <p className="text-slate-500 font-medium text-lg">Getting started with AgriAid is easier than ever</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-12 max-w-5xl mx-auto">
+
+          <div className="grid md:grid-cols-3 gap-12 max-w-6xl mx-auto relative">
+            {/* Connection Lines (Desktop Only) */}
+            <div className="hidden md:block absolute top-1/3 left-[20%] right-[20%] h-0.5 border-t-2 border-dashed border-green-200 -z-10"></div>
+            
             {[
-              { icon: <FaRocket />, title: "Register", desc: "Create your farmer profile in under 60 seconds." },
-              { icon: <FaCogs />, title: "Select Tools", desc: "Choose from disease scan, weather or library." },
-              { icon: <FaCheckCircle />, title: "Grow Better", desc: "Implement recommendations and track growth." },
+              { 
+                step: "01", 
+                icon: <FaRocket />, 
+                title: "Register Free", 
+                desc: "Create your farmer profile in under 60 seconds and join our community.",
+                color: "text-green-600 bg-green-50"
+              },
+              { 
+                step: "02", 
+                icon: <MdOutlineScreenSearchDesktop />, 
+                title: "Choose Service", 
+                desc: "Upload a crop photo for diagnosis or check local weather and expert tips.",
+                color: "text-blue-600 bg-blue-50"
+              },
+              { 
+                step: "03", 
+                icon: <FaCheckCircle />, 
+                title: "Grow Smart", 
+                desc: "Implement AI-powered recommendations and track your crop's healthy growth.",
+                color: "text-orange-600 bg-orange-50"
+              },
             ].map((item, index) => (
-              <div key={index} className="text-center fade-in-up slide-in-visible">
-                <div className="bg-white w-20 h-20 rounded-[1.5rem] flex items-center justify-center mx-auto mb-8 text-3xl text-green-600 shadow-xl shadow-green-50 border border-green-50">{item.icon}</div>
-                <h3 className="text-2xl font-black text-slate-800 mb-4">{item.title}</h3>
-                <p className="text-slate-500 font-medium leading-relaxed">{item.desc}</p>
+              <div key={index} className="relative group">
+                {/* Step Number Badge */}
+                <div className="absolute -top-10 left-1/2 -translate-x-1/2 text-7xl font-black text-slate-100/80 -z-10 group-hover:text-green-100 transition-colors">
+                  {item.step}
+                </div>
+                
+                <div className="bg-white rounded-[2.5rem] p-8 text-center shadow-xl shadow-slate-100 border border-slate-100 hover-premium transition-all relative">
+                  <div className={`w-20 h-20 rounded-3xl ${item.color} flex items-center justify-center mx-auto mb-8 text-3xl shadow-inner group-hover:scale-110 transition-transform duration-500`}>
+                    {item.icon}
+                  </div>
+                  <h3 className="text-2xl font-black text-slate-800 mb-4">{item.title}</h3>
+                  <p className="text-slate-500 font-medium leading-relaxed">{item.desc}</p>
+                  
+                  {/* Bottom Indicator */}
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-green-200 rounded-full group-hover:w-8 group-hover:bg-green-500 transition-all"></div>
+                </div>
               </div>
             ))}
           </div>

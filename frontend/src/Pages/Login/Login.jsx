@@ -26,7 +26,6 @@ export default function Login() {
 
       toast.success(res.data.message || "Login Successful!");
 
-      // ✅ Save login data
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
@@ -35,10 +34,7 @@ export default function Login() {
         sessionStorage.setItem("user", JSON.stringify(res.data.user));
       }
 
-      // 🔥 Dispatch custom event so Header updates instantly
       window.dispatchEvent(new Event("userChanged"));
-
-      // ✅ Navigate to homepage
       navigate("/");
 
     } catch (err) {
@@ -48,95 +44,108 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center py-12 px-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-[#FCF9F1] flex items-center justify-center py-12 px-4 relative overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="absolute top-0 left-0 w-64 h-64 bg-green-100/30 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-emerald-100/20 rounded-full blur-3xl translate-x-1/3 translate-y-1/3" />
+
+      <div className="w-full max-w-md relative z-10">
         {/* Logo Section */}
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2 mb-4">
-            <div className="bg-green-600 p-3 rounded-lg">
-              <Sprout className="w-8 h-8 text-white" />
+        <div className="text-center mb-10">
+          <Link to="/" className="inline-block group">
+            <div className="bg-white p-2 rounded-2xl shadow-sm border border-green-100 inline-block group-hover:scale-105 transition-transform duration-300">
+              <img
+                src="/agriaid_logo.jpg"
+                alt="AgriAid Logo"
+                className="w-16 h-16 object-contain rounded-xl"
+              />
             </div>
-            <span className="text-green-700 text-2xl font-bold">AgriAid</span>
+            <h1 className="mt-4 text-4xl font-black tracking-tight text-slate-900 group-hover:text-green-600 transition-colors">
+              AgriAid
+            </h1>
           </Link>
-          <h1 className="text-gray-800 mb-2 text-xl font-semibold">Welcome Back</h1>
-          <p className="text-gray-600">Sign in to access your farming dashboard</p>
+          <p className="mt-2 text-slate-500 font-medium">Welcome back to your farming assistant</p>
         </div>
 
         {/* Login Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Login to Your Account</CardTitle>
-            <CardDescription>Enter your credentials to continue</CardDescription>
-          </CardHeader>
+        <div className="bg-white rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-8 md:p-10">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-slate-900">Sign In</h2>
+            <p className="text-slate-500 text-sm mt-1">Access your personalized dashboard and AI tools</p>
+          </div>
 
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Email Input */}
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="farmer@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Password Input */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
-                  <Link to="/forgot-password" className="text-sm text-green-600 hover:text-green-700">
-                    Forgot password?
-                  </Link>
-                </div>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Remember Me Checkbox */}
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="remember"
-                  checked={rememberMe}
-                  onCheckedChange={(checked) => setRememberMe(checked)}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm font-bold text-slate-700 ml-1">Email Address</Label>
+              <div className="relative group">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-green-500 transition-colors" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="farmer@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-12 h-12 rounded-xl border-slate-200 focus:border-green-500 focus:ring-green-500/10 bg-slate-50/30 transition-all"
+                  required
                 />
-                <label htmlFor="remember" className="text-sm text-gray-700 cursor-pointer">
-                  Remember me for 30 days
-                </label>
               </div>
-
-              {/* Submit Button */}
-              <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">
-                Sign In
-              </Button>
-            </form>
-
-            {/* Sign Up Link */}
-            <div className="mt-6 text-center text-sm">
-              <span className="text-gray-600">Don't have an account? </span>
-              <Link to="/signup" className="text-green-600 hover:text-green-700">
-                Sign up for free
-              </Link>
             </div>
-          </CardContent>
-        </Card>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between ml-1">
+                <Label htmlFor="password" className="text-sm font-bold text-slate-700">Password</Label>
+                <Link to="/forgot-password" className="text-xs font-bold text-green-600 hover:text-green-700 hover:underline transition-all">
+                  Forgot?
+                </Link>
+              </div>
+              <div className="relative group">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-green-500 transition-colors" />
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-12 h-12 rounded-xl border-slate-200 focus:border-green-500 focus:ring-green-500/10 bg-slate-50/30 transition-all"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-3 ml-1">
+              <Checkbox
+                id="remember"
+                checked={rememberMe}
+                onCheckedChange={(checked) => setRememberMe(checked)}
+                className="rounded-md border-slate-300 text-green-600 focus:ring-green-500/20"
+              />
+              <label htmlFor="remember" className="text-sm font-medium text-slate-600 cursor-pointer select-none">
+                Remember me for 30 days
+              </label>
+            </div>
+
+            <Button 
+              type="submit" 
+              className="w-full h-14 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-bold text-lg shadow-lg shadow-green-100 transition-all active:scale-[0.98] mt-2"
+            >
+              Log In
+            </Button>
+          </form>
+
+          <div className="mt-8 text-center">
+            <p className="text-sm text-slate-500 font-medium">
+              New here?{" "}
+              <Link to="/signup" className="text-green-600 font-bold hover:text-green-700 hover:underline ml-1">
+                Create a free account
+              </Link>
+            </p>
+          </div>
+        </div>
+
+        {/* Footer info */}
+        <p className="mt-10 text-center text-xs text-slate-400 font-medium">
+          Protected by AgriAid Secure Guard &bull; &copy; 2024 AgriAid
+        </p>
       </div>
     </div>
   );

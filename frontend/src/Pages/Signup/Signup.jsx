@@ -53,174 +53,193 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center py-12 px-4">
-      <div className="w-full max-w-2xl">
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2 mb-4">
-            <div className="bg-green-600 p-3 rounded-lg">
-              <Sprout className="w-8 h-8 text-white" />
+    <div className="min-h-screen bg-[#FCF9F1] flex items-center justify-center py-12 px-4 relative overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="absolute top-0 right-0 w-80 h-80 bg-green-100/40 rounded-full blur-3xl translate-x-1/3 -translate-y-1/3" />
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-100/20 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2" />
+
+      <div className="w-full max-w-2xl relative z-10">
+        {/* Logo Section */}
+        <div className="text-center mb-10">
+          <Link to="/" className="inline-block group">
+            <div className="bg-white p-2 rounded-2xl shadow-sm border border-green-100 inline-block group-hover:scale-105 transition-transform duration-300">
+              <img
+                src="/agriaid_logo.jpg"
+                alt="AgriAid Logo"
+                className="w-16 h-16 object-contain rounded-xl"
+              />
             </div>
-            <span className="text-green-700 text-2xl">AgriAid</span>
+            <h1 className="mt-4 text-4xl font-black tracking-tight text-slate-900 group-hover:text-green-600 transition-colors">
+              AgriAid
+            </h1>
           </Link>
-          <h1 className="text-gray-800 mb-2">Create Your Account</h1>
-          <p className="text-gray-600">Join thousands of farmers using AgriAid</p>
+          <p className="mt-2 text-slate-500 font-medium italic">Empowering Farmers with AI-Driven Excellence</p>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Sign Up for Free</CardTitle>
-            <CardDescription>
-              Get started with crop disease detection and expert farming advice
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Name */}
+        {/* Signup Card */}
+        <div className="bg-white rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-8 md:p-12">
+          <div className="mb-10 text-center">
+            <h2 className="text-3xl font-black text-slate-900">Create Account</h2>
+            <p className="text-slate-500 mt-2">Join our community and start optimizing your crops today</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Full Name */}
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-sm font-bold text-slate-700 ml-1">Full Name</Label>
+              <div className="relative group">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-green-500 transition-colors" />
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Enter your full name"
+                  value={formData.name}
+                  onChange={(e) => updateField("name", e.target.value)}
+                  className="pl-12 h-12 rounded-xl border-slate-200 focus:border-green-500 focus:ring-green-500/10 bg-slate-50/30 transition-all"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Email and Phone */}
+            <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Label htmlFor="email" className="text-sm font-bold text-slate-700 ml-1">Email Address</Label>
+                <div className="relative group">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-green-500 transition-colors" />
                   <Input
-                    id="name"
-                    type="text"
-                    placeholder="Enter your full name"
-                    value={formData.name}
-                    onChange={(e) => updateField("name", e.target.value)}
-                    className="pl-10"
+                    id="email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={formData.email}
+                    onChange={(e) => updateField("email", e.target.value)}
+                    className="pl-12 h-12 rounded-xl border-slate-200 focus:border-green-500 focus:ring-green-500/10 bg-slate-50/30 transition-all"
                     required
                   />
                 </div>
               </div>
-
-              {/* Email and Phone */}
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={formData.email}
-                      onChange={(e) => updateField("email", e.target.value)}
-                      className="pl-10"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <Input
-                      id="phone"
-                      type="tel"
-                      placeholder="+91 XXXXXXXXXX"
-                      value={formData.phone}
-                      onChange={(e) => updateField("phone", e.target.value)}
-                      className="pl-10"
-                      required
-                    />
-                  </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone" className="text-sm font-bold text-slate-700 ml-1">Phone Number</Label>
+                <div className="relative group">
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-green-500 transition-colors" />
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="+91 XXXXXXXXXX"
+                    value={formData.phone}
+                    onChange={(e) => updateField("phone", e.target.value)}
+                    className="pl-12 h-12 rounded-xl border-slate-200 focus:border-green-500 focus:ring-green-500/10 bg-slate-50/30 transition-all"
+                    required
+                  />
                 </div>
               </div>
-
-              {/* Location and Farm Size */}
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="location">Location (State/District)</Label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <Input
-                      id="location"
-                      type="text"
-                      placeholder="e.g., Punjab, Ludhiana"
-                      value={formData.location}
-                      onChange={(e) => updateField("location", e.target.value)}
-                      className="pl-10"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="farmSize">Farm Size</Label>
-                  <Select
-                    value={formData.farmSize}
-                    onValueChange={(value) => updateField("farmSize", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select farm size" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="small">Small (&lt; 2 acres)</SelectItem>
-                      <SelectItem value="medium">Medium (2-10 acres)</SelectItem>
-                      <SelectItem value="large">Large (&gt; 10 acres)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Password */}
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="Create a password"
-                      value={formData.password}
-                      onChange={(e) => updateField("password", e.target.value)}
-                      className="pl-10"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      placeholder="Confirm password"
-                      value={formData.confirmPassword}
-                      onChange={(e) => updateField("confirmPassword", e.target.value)}
-                      className="pl-10"
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-2">
-                <Checkbox
-                  id="terms"
-                  checked={formData.agreeToTerms}
-                  onCheckedChange={(checked) => updateField("agreeToTerms", checked)}
-                  required
-                />
-                <label htmlFor="terms" className="text-sm text-gray-700 cursor-pointer leading-relaxed">
-                  I agree to the{" "}
-                  <a href="#" className="text-green-600 hover:text-green-700">Terms of Service</a>{" "}
-                  and{" "}
-                  <a href="#" className="text-green-600 hover:text-green-700">Privacy Policy</a>
-                </label>
-              </div>
-
-              <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={!formData.agreeToTerms}>
-                Create Account
-              </Button>
-            </form>
-
-            <div className="mt-6 text-center text-sm">
-              <span className="text-gray-600">Already have an account? </span>
-              <Link to="/login" className="text-green-600 hover:text-green-700">Sign in</Link>
             </div>
-          </CardContent>
-        </Card>
+
+            {/* Location and Farm Size */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="location" className="text-sm font-bold text-slate-700 ml-1">Location</Label>
+                <div className="relative group">
+                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-green-500 transition-colors" />
+                  <Input
+                    id="location"
+                    type="text"
+                    placeholder="e.g., Punjab, Ludhiana"
+                    value={formData.location}
+                    onChange={(e) => updateField("location", e.target.value)}
+                    className="pl-12 h-12 rounded-xl border-slate-200 focus:border-green-500 focus:ring-green-500/10 bg-slate-50/30 transition-all"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="farmSize" className="text-sm font-bold text-slate-700 ml-1">Farm Size</Label>
+                <Select
+                  value={formData.farmSize}
+                  onValueChange={(value) => updateField("farmSize", value)}
+                >
+                  <SelectTrigger className="h-12 rounded-xl border-slate-200 focus:ring-green-500/10 bg-slate-50/30">
+                    <SelectValue placeholder="Select size" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl border-slate-100 shadow-2xl bg-white z-[100]">
+                    <SelectItem value="small" className="cursor-pointer hover:bg-green-50 transition-colors">Small (&lt; 2 acres)</SelectItem>
+                    <SelectItem value="medium" className="cursor-pointer hover:bg-green-50 transition-colors">Medium (2-10 acres)</SelectItem>
+                    <SelectItem value="large" className="cursor-pointer hover:bg-green-50 transition-colors">Large (&gt; 10 acres)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Password Section */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-bold text-slate-700 ml-1">Password</Label>
+                <div className="relative group">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-green-500 transition-colors" />
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Min 8 characters"
+                    value={formData.password}
+                    onChange={(e) => updateField("password", e.target.value)}
+                    className="pl-12 h-12 rounded-xl border-slate-200 focus:border-green-500 focus:ring-green-500/10 bg-slate-50/30 transition-all"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword" className="text-sm font-bold text-slate-700 ml-1">Confirm</Label>
+                <div className="relative group">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-green-500 transition-colors" />
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="Repeat password"
+                    value={formData.confirmPassword}
+                    onChange={(e) => updateField("confirmPassword", e.target.value)}
+                    className="pl-12 h-12 rounded-xl border-slate-200 focus:border-green-500 focus:ring-green-500/10 bg-slate-50/30 transition-all"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Terms */}
+            <div className="flex items-start space-x-3 ml-1 pt-2">
+              <Checkbox
+                id="terms"
+                checked={formData.agreeToTerms}
+                onCheckedChange={(checked) => updateField("agreeToTerms", checked)}
+                className="mt-1 rounded-md border-slate-300 text-green-600 focus:ring-green-500/20"
+                required
+              />
+              <label htmlFor="terms" className="text-sm text-slate-600 font-medium leading-relaxed cursor-pointer select-none">
+                I agree to the <a href="#" className="text-green-600 font-bold hover:underline">Terms of Service</a> and <a href="#" className="text-green-600 font-bold hover:underline">Privacy Policy</a>
+              </label>
+            </div>
+
+            <Button 
+              type="submit" 
+              className="w-full h-14 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-bold text-xl shadow-lg shadow-green-100 transition-all active:scale-[0.98] mt-4"
+              disabled={!formData.agreeToTerms}
+            >
+              Get Started Now
+            </Button>
+          </form>
+
+          <div className="mt-10 text-center">
+            <p className="text-sm text-slate-500 font-medium">
+              Already have an account?{" "}
+              <Link to="/login" className="text-green-600 font-bold hover:text-green-700 hover:underline ml-1">
+                Sign in here
+              </Link>
+            </p>
+          </div>
+        </div>
+
+        <p className="mt-10 text-center text-xs text-slate-400 font-medium">
+          &copy; 2024 AgriAid - Agriculture Empowerment through AI
+        </p>
       </div>
     </div>
   );
