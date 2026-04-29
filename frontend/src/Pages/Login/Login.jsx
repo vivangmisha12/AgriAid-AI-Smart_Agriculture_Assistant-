@@ -8,6 +8,7 @@ import { Label } from "../../components/ui/Label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/Card";
 import { Checkbox } from "../../components/ui/Checkbox";
 import { Sprout, Mail, Lock } from "lucide-react";
+import API_URL from "../../api";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ export default function Login() {
     e.preventDefault();
 
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
+      const res = await axios.post(`${API_URL}/api/auth/login`, {
         email,
         password,
       });

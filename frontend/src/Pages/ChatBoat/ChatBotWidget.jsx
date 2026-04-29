@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Send, ChevronDown } from "lucide-react";
+import API_URL from "../../api";
 
 export default function Chatbot() {
   // -------------------- STATES --------------------
@@ -34,7 +35,7 @@ export default function Chatbot() {
   // -------------------- AI RESPONSE FUNCTION --------------------
   const getAIResponse = async (msg, lang = "hi") => {
     try{
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/chat`, {
+      const response = await fetch(`${API_URL}/api/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

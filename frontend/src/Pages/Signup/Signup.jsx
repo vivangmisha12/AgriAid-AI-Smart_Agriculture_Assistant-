@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../..
 import { Checkbox } from "../../components/ui/Checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Sprout, User, Mail, Phone, MapPin, Lock } from "lucide-react";
+import API_URL from "../../api";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -36,7 +37,7 @@ export default function Signup() {
     }
 
     try {
-      const res = await axios.post( `${import.meta.env.VITE_API_URL}/api/auth/signup`, {
+      const res = await axios.post( `${API_URL}/api/auth/signup`, {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,

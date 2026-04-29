@@ -5,6 +5,7 @@ import { MdInfoOutline, MdHistory } from 'react-icons/md';
 import ReactMarkdown from 'react-markdown';
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
+import API_URL from "../../api";
 
 const DiseaseDetection = () => {
     const [selectedImage, setSelectedImage] = useState(null);
@@ -33,7 +34,7 @@ const DiseaseDetection = () => {
         formData.append('lang', lang);
 
         try {
-            const response = await axios.post('http://localhost:5000/api/detect', formData, {
+            const response = await axios.post(`${API_URL}/api/detect`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
             setResult(response.data);
