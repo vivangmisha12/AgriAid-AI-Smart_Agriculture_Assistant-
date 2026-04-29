@@ -146,9 +146,12 @@ const upload = multer({ storage });
 // Free vision models — fallback order mein (1 fail → 2 pe, 2 fail → 3 pe)
 // IDs verified from OpenRouter live API on 2026-04-27
 const VISION_MODELS = [
-  "google/gemma-3-27b-it:free",       // Best quality — Google Gemma 3 27B
-  "google/gemma-3-12b-it:free",       // Backup — Google Gemma 3 12B
-  "nvidia/nemotron-nano-12b-v2-vl:free", // Second backup — NVIDIA Nemotron 12B
+  "google/gemma-4-31b-it:free",       // Newest Gemma 4
+  "google/gemma-4-26b-a4b-it:free",   // Gemma 4 MoE
+  "google/gemma-3-27b-it:free",       // Gemma 3 27B
+  "google/gemma-3-12b-it:free",       // Gemma 3 12B
+  "nvidia/nemotron-3-nano-omni:free", // Nemotron 3 Omni
+  "nvidia/nemotron-nano-12b-v2-vl:free", // Nemotron Nano VL
 ];
 
 // Language-aware prompt builder
@@ -156,72 +159,74 @@ function buildVisionPrompt(lang) {
   const isHindi = lang === 'Hindi' || lang === 'hi';
 
   if (isHindi) {
-    // Strategy: Model ko English mein sochne do (accuracy better hoti hai),
-    // lekin output Hindi mein dene do — isse 60-70%+ accuracy milti hai
-    return `You are an expert agricultural scientist. Carefully analyze this plant/crop image.
+    return `You are an expert agricultural scientist (Kishi Vigyanik). Carefully analyze this image.
 
-STEP 1 — Internal Analysis (think in English for accuracy):
-- Identify the exact crop/plant species visible
-- Look for: leaf discoloration, spots, wilting, lesions, fungal growth, pest damage, nutrient deficiency signs
-- Determine: disease name (scientific + common), severity (mild/moderate/severe), cause (fungal/bacterial/viral/pest/deficiency)
+OBJECTIVE:
+- If the image is related to agriculture (crops, plants, leaves, soil, farm, pests, insects, agricultural tools, irrigation, etc.), provide a detailed analysis.
+- If the image is NOT related to agriculture (e.g., cars, electronics, people only, buildings, generic objects), reply ONLY: "यह छवि कृषि से संबंधित नहीं है।"
 
-STEP 2 — Output in Hindi (Devanagari script only, no English letters):
-If the image is NOT related to agriculture (car, person, building, etc.) — reply ONLY: "यह छवि कृषि से संबंधित नहीं है।"
+STEP 1 — Analysis (Think in English for scientific accuracy):
+- Category: (Crop/Soil/Pest/Farm/General)
+- Identify: Crop type, soil texture, specific pest, or farm condition.
+- Issue: If any disease, pest, nutrient deficiency, or soil problem is visible.
+- Remedies: Practical solutions (Organic and Chemical).
 
-If agricultural content is detected — respond in this EXACT format in pure Hindi:
+STEP 2 — Output in PURE Hindi (Devanagari script only):
+Format your response exactly like this:
 
-## 🌿 पहचान
-**फसल/पौधा:** (crop name in Hindi)
-**रोग/समस्या का नाम:** (disease name in Hindi — also write scientific name in brackets)
-**गंभीरता:** (हल्की / मध्यम / गंभीर)
-**कारण:** (फंगस / बैक्टीरिया / वायरस / कीट / पोषण की कमी)
+## 🌿 पहचान और विश्लेषण
+**श्रेणी:** (फसल / मिट्टी / कीट / खेत / अन्य)
+**नाम/प्रकार:** (जैसे: गेहूं की फसल, काली मिट्टी, तना छेदक कीट, आदि)
+**स्थिति:** (स्वस्थ / मध्यम समस्या / गंभीर समस्या)
 
-## 🔍 लक्षण और विवरण
-(3-4 bullet points in Hindi describing exact visible symptoms)
+## 🔍 मुख्य विवरण
+(3-4 bullet points in Hindi describing what is visible in the image, like symptoms, soil condition, or pest type)
 
-## 🌱 घरेलू/जैविक उपाय
-(3-4 practical organic remedies in Hindi with quantities)
+## 🌱 समाधान (जैविक/घरेलू)
+(3-4 practical organic or home-based remedies/suggestions)
 
-## ⚗️ रासायनिक उपाय
-(2-3 chemical treatments with commercial product names and dosage)
+## ⚗️ रासायनिक समाधान (यदि आवश्यक हो)
+(2-3 specific chemical treatments or fertilizers with names and dosage)
 
-## ⚠️ सावधानी
-(1-2 important precautions for the farmer)
+## ⚠️ विशेष सलाह
+(1-2 important precautions or future advice for the farmer)
 
-IMPORTANT: Use ONLY Devanagari script. No English words. Be specific and accurate.`;
+IMPORTANT: Use ONLY Hindi (Devanagari script). No English letters or Hinglish. Be extremely accurate and helpful for a farmer.`;
   } else {
     // English
-    return `You are an expert agricultural scientist. Carefully analyze this plant/crop image.
+    return `You are an expert agricultural scientist. Carefully analyze this image.
+
+OBJECTIVE:
+- If the image is related to agriculture (crops, plants, leaves, soil, farm, pests, insects, agricultural tools, irrigation, etc.), provide a detailed analysis.
+- If the image is NOT related to agriculture (e.g., cars, electronics, people only, buildings, generic objects), reply ONLY: "This image is not related to agriculture."
 
 STEP 1 — Analysis:
-- Identify the exact crop/plant species visible
-- Look for: leaf discoloration, spots, wilting, lesions, fungal growth, pest damage, nutrient deficiency signs
-- Determine: disease name (scientific + common), severity, cause
+- Category: (Crop/Soil/Pest/Farm/General)
+- Identify: Exact crop species, soil type, pest name, or farm layout.
+- Issue: Detect diseases, infestations, nutrient deficiencies, or structural issues.
+- Remedies: Suggest practical solutions.
 
 STEP 2 — Output:
-If the image is NOT related to agriculture (car, person, building, etc.) — reply ONLY: "This image is not related to agriculture."
+Format your response exactly like this:
 
-If agricultural content is detected — respond in this EXACT format:
+## 🌿 Identification & Analysis
+**Category:** (Crop / Soil / Pest / Farm / General)
+**Name/Type:** (e.g., Tomato Leaf, Clay Soil, Aphids, etc.)
+**Condition:** (Healthy / Mild Issue / Severe Issue)
 
-## 🌿 Identification
-**Crop/Plant:** (name)
-**Disease/Issue:** (common name + scientific name)
-**Severity:** (Mild / Moderate / Severe)
-**Cause:** (Fungal / Bacterial / Viral / Pest / Nutrient Deficiency)
-
-## 🔍 Symptoms & Description
-(3-4 bullet points describing exact visible symptoms)
+## 🔍 Observations
+(3-4 bullet points describing exact visible symptoms, soil characteristics, or pest markers)
 
 ## 🌱 Organic / Home Remedies
-(3-4 practical organic remedies with quantities)
+(3-4 practical organic treatments or management practices)
 
-## ⚗️ Chemical Remedies
-(2-3 chemical treatments with commercial product names and dosage)
+## ⚗️ Chemical Treatments (If applicable)
+(2-3 chemical solutions or fertilizers with product names and dosage)
 
-## ⚠️ Precautions
-(1-2 important precautions for the farmer)
+## ⚠️ Expert Advice
+(1-2 important precautions or future prevention tips)
 
-Be specific, accurate, and practical for a real farmer.`;
+Be scientific, specific, and practical for real-world farming.`;
   }
 }
 

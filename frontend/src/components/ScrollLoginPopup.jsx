@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { X, LogIn, UserPlus } from 'lucide-react';
 import { Button } from './ui/Button';
 
@@ -7,6 +7,16 @@ const ScrollLoginPopup = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")));
+  const location = useLocation();
+
+  // Pages where login is strictly mandatory (No Close Button)
+  const mandatoryRoutes = ["/disease-detection", "/weather", "/suggestions", "/knowledge-base"];
+  // Pages where popup shows immediately but can be closed (Home)
+  const protectedRoutes = ["/", ...mandatoryRoutes];
+  
+  const isProtected = protectedRoutes.includes(location.pathname);
+  const isMandatory = mandatoryRoutes.includes(location.pathname);
+  const isAuthPage = ["/login", "/signup"].includes(location.pathname);
 
   useEffect(() => {
     // Listen for auth changes
@@ -24,44 +34,33 @@ const ScrollLoginPopup = () => {
   }, []);
 
   useEffect(() => {
-    const hasClosed = sessionStorage.getItem("loginPopupClosed");
-    
-    // If user is already logged in or has closed the popup in this session, don't do anything
-    if (user || hasClosed) {
+    if (user || isAuthPage) {
       setIsOpen(false);
       setIsVisible(false);
       return;
     }
 
-    let timer;
-    const handleScroll = () => {
-      // Once user scrolls, wait 5 seconds then show popup
-      timer = setTimeout(() => {
-        setIsOpen(true);
-        // Small delay to trigger entry animation
-        setTimeout(() => setIsVisible(true), 50);
-      }, 5000);
-      
-      // We only want to trigger the 5s timer once per session
-      window.removeEventListener('scroll', handleScroll);
-    };
+    // If it's the home page and user already closed it, don't show
+    if (location.pathname === "/" && sessionStorage.getItem("loginPopupClosed")) {
+      return;
+    }
 
-    window.addEventListener('scroll', handleScroll);
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      if (timer) clearTimeout(timer);
-    };
-  }, [user]);
+    if (isProtected) {
+      // Show immediately
+      setIsOpen(true);
+      const timer = setTimeout(() => setIsVisible(true), 100);
+      return () => clearTimeout(timer);
+    }
+  }, [user, location.pathname, isProtected, isAuthPage]);
 
   const handleClose = () => {
+    if (isMandatory) return; // Prevent closing on mandatory pages
     setIsVisible(false);
     sessionStorage.setItem("loginPopupClosed", "true");
-    // Wait for exit animation before unmounting
     setTimeout(() => setIsOpen(false), 500);
   };
 
-  if (!isOpen || user) return null;
+  if (!isOpen || user || isAuthPage) return null;
 
   return (
     <div 
@@ -71,32 +70,34 @@ const ScrollLoginPopup = () => {
     >
       {/* Backdrop with blur */}
       <div 
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]" 
-        onClick={handleClose}
+        className={`absolute inset-0 bg-slate-900/60 backdrop-blur-[6px] transition-all duration-1000 ${isMandatory ? 'cursor-default' : 'cursor-pointer'}`} 
+        onClick={isMandatory ? null : handleClose}
       />
       
       {/* Modal Container */}
       <div 
-        className={`relative bg-white rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.2)] w-full max-w-md overflow-hidden transform transition-all duration-500 ease-out ${
-          isVisible ? 'scale-100 translate-y-0 rotate-0' : 'scale-90 translate-y-12 rotate-2'
+        className={`relative bg-white rounded-[2.5rem] shadow-[0_25px_60px_rgba(0,0,0,0.3)] w-full max-w-md overflow-hidden transform transition-all duration-500 ease-out border border-slate-100 ${
+          isVisible ? 'scale-100 translate-y-0' : 'scale-95 translate-y-8'
         }`}
       >
         {/* Decorative Top Bar */}
-        <div className="h-2 bg-gradient-to-r from-green-400 via-emerald-500 to-green-600" />
+        <div className="h-2.5 bg-gradient-to-r from-green-400 via-emerald-500 to-green-600" />
         
-        <button 
-          onClick={handleClose}
-          className="absolute top-6 right-6 p-2 rounded-xl hover:bg-slate-100 transition-all duration-300 group"
-          aria-label="Close"
-        >
-          <X className="w-5 h-5 text-slate-400 group-hover:text-slate-600 group-hover:rotate-90 transition-all" />
-        </button>
+        {!isMandatory && (
+          <button 
+            onClick={handleClose}
+            className="absolute top-6 right-6 p-2 rounded-xl hover:bg-slate-100 transition-all duration-300 group"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5 text-slate-400 group-hover:text-slate-600 group-hover:rotate-90 transition-all" />
+          </button>
+        )}
 
         <div className="p-10 text-center">
           {/* Logo Section */}
           <div className="relative w-24 h-24 mx-auto mb-8">
             <div className="absolute inset-0 bg-green-100 rounded-3xl rotate-6 animate-pulse" />
-            <div className="absolute inset-0 bg-white rounded-3xl shadow-sm border border-green-50 flex items-center justify-center -rotate-3 hover:rotate-0 transition-transform duration-500">
+            <div className="absolute inset-0 bg-white rounded-3xl shadow-sm border border-green-50 flex items-center justify-center -rotate-3">
               <img 
                 src="/agriaid_logo.jpg" 
                 alt="AgriAid Logo" 
@@ -106,17 +107,19 @@ const ScrollLoginPopup = () => {
           </div>
           
           <h2 className="text-3xl font-black text-slate-900 mb-3 tracking-tight">
-            Elevate Your Farming! 🌾
+            {location.pathname === "/" ? "Welcome to AgriAid AI! 👋" : "Registration Required! 🔒"}
           </h2>
           <p className="text-slate-500 text-lg leading-relaxed mb-10">
-            Log in to unlock <span className="font-bold text-green-600">AI-powered</span> diagnoses and expert crop suggestions tailored for you.
+            {location.pathname === "/" 
+              ? "Join our community of smart farmers to access AI tools and expert advice." 
+              : "This premium tool is only for registered farmers. Please log in to continue."}
           </p>
 
           <div className="space-y-4">
-            <Link to="/login" onClick={handleClose}>
+            <Link to="/login" onClick={isProtected ? null : handleClose}>
               <Button className="w-full h-14 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-bold text-xl flex items-center justify-center gap-3 shadow-xl shadow-green-100 group transition-all active:scale-95">
                 <LogIn className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
-                Login Now
+                Login to Continue
               </Button>
             </Link>
             
@@ -126,7 +129,7 @@ const ScrollLoginPopup = () => {
               <div className="flex-grow h-[1px] bg-slate-100" />
             </div>
 
-            <Link to="/signup" onClick={handleClose}>
+            <Link to="/signup" onClick={isProtected ? null : handleClose}>
               <Button 
                 variant="outline" 
                 className="w-full h-14 border-2 border-slate-100 hover:border-green-100 hover:bg-green-50 text-slate-700 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all active:scale-95"
@@ -138,7 +141,7 @@ const ScrollLoginPopup = () => {
           </div>
           
           <p className="mt-8 text-xs text-slate-400 font-medium italic">
-            Don't miss out on premium features!
+            AgriAid is better when you're logged in.
           </p>
         </div>
       </div>
