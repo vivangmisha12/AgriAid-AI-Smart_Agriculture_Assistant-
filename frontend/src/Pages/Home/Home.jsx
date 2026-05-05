@@ -103,7 +103,7 @@ export default function HomePage() {
   const isCtaVisible = useIntersectionObserver(ctaRef);
 
   return (
-    <div className="min-h-screen bg-[#FCF9F1]">
+    <div className="min-h-screen bg-[#FCF9F1] overflow-x-hidden">
       <style>{customStyles}</style>
 
       {/* Hero Section */}

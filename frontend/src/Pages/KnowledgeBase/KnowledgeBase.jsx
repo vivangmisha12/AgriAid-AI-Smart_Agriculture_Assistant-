@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/Card";
 import { Input } from "../../components/ui/input";
 import { Badge } from "../../components/ui/Badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Button } from "../../components/ui/Button";
+import { Label } from "../../components/ui/Label";
 import { toast } from "react-hot-toast";
+import API_URL from "../../api";
 import {
   BookOpen,
   Search,
@@ -18,7 +20,9 @@ import {
   Video,
   HelpCircle,
   ArrowRight,
-  LayoutGrid
+  LayoutGrid,
+  Droplets,
+  Sprout
 } from "lucide-react";
 import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
 import "./KnowledgeBase.css";
@@ -26,8 +30,65 @@ import "./KnowledgeBase.css";
 export default function KnowledgeBase() {
   const [selectedCategory, setSelectedCategory] = useState("All Articles");
   const [searchQuery, setSearchQuery] = useState("");
+  const [user, setUser] = useState(null);
+  const [customArticles, setCustomArticles] = useState([]);
+  const [showUploadForm, setShowUploadForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [articleForm, setArticleForm] = useState({
+    title: "",
+    category: "Technology",
+    author: "Admin",
+    readTime: "5 min",
+    excerpt: "",
+    tags: "",
+    imageUrl: "",
+    url: "",
+  });
+  const [imageFile, setImageFile] = useState(null);
+  const [editingArticleId, setEditingArticleId] = useState(null);
 
-  const articles = [
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      console.log("📦 User from localStorage:", parsedUser);
+      setUser(parsedUser);
+    }
+
+    const handleAuthChange = () => {
+      const updatedUser = localStorage.getItem("user");
+      const parsedUser = updatedUser ? JSON.parse(updatedUser) : null;
+      console.log("🔄 User updated via event:", parsedUser);
+      setUser(parsedUser);
+    };
+
+    window.addEventListener("storage", handleAuthChange);
+    window.addEventListener("userChanged", handleAuthChange);
+
+    return () => {
+      window.removeEventListener("storage", handleAuthChange);
+      window.removeEventListener("userChanged", handleAuthChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    const loadArticles = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/articles`);
+        const data = await response.json();
+
+        if (response.ok) {
+          setCustomArticles(Array.isArray(data.articles) ? data.articles : []);
+        }
+      } catch (error) {
+        console.error("Failed to load custom articles:", error);
+      }
+    };
+
+    loadArticles();
+  }, []);
+
+  const defaultArticles = [
     // Innovation / Technology
     {
       id: 1,
@@ -40,7 +101,7 @@ export default function KnowledgeBase() {
       likes: 450,
       excerpt: "Nano Urea is revolutionizing Indian agriculture by reducing traditional urea requirement by 50%. Learn how to apply it and its benefits for crop yield and soil health.",
       tags: ["IFFCO", "NanoTech", "Fertilizer"],
-      image: "img_1.avif",
+      image: "/img_1.avif",
       url: "https://krishijagran.com/agripedia/iffco-nano-urea-the-only-nano-fertilizer-approved-by-govt-of-india-know-its-uses-benefits/"
     },
     {
@@ -54,9 +115,11 @@ export default function KnowledgeBase() {
       likes: 312,
       excerpt: "Government subsidies are making drones accessible for small farmers. Discover the eligibility, required documents, and the full application process.",
       tags: ["Drones", "AgriTech", "Subsidy"],
-      image: "/public/img_2.webp",
+      image: "/img_2.webp",
       url: "https://krishijagran.com/agriculture-world/government-offers-100-subsidy-for-purchase-of-drones/"
     },
+
+    // Organic Farming
     {
       id: 3,
       title: "Shree Anna: Benefits of Millets and Why India is Celebrating",
@@ -68,9 +131,50 @@ export default function KnowledgeBase() {
       likes: 890,
       excerpt: "From Bajra to Ragi, millets are making a global comeback. Learn the climate-resilient practices for millet cultivation and their high nutritional value.",
       tags: ["Millets", "ShreeAnna", "ICAR"],
-      image: "/public/img_3.jpg",
+      image: "/img_3.jpg",
       url: "https://krishijagran.com/featured/shree-anna-millets-to-bring-prosperity-to-farmers-and-people/"
     },
+    {
+      id: 101,
+      title: "Vermicompost Preparation: A Step-by-Step Guide",
+      category: "Organic Farming",
+      author: "Priya Sharma",
+      date: "Feb 01, 2026",
+      readTime: "8 min",
+      excerpt: "Learn how to turn farm waste into 'Black Gold' using earthworms. Perfect for small scale organic farmers.",
+      tags: ["Organic", "Compost", "WasteManagement"],
+      image: "/ag5.png",
+      url: "https://krishijagran.com/news/how-to-make-vermicompost/"
+    },
+
+    // Pest Management
+    {
+      id: 201,
+      title: "Pheromone Traps: Smart Pest Monitoring",
+      category: "Pest Management",
+      author: "AgriScientist",
+      date: "Jan 15, 2026",
+      readTime: "9 min",
+      excerpt: "Track and trap pests like Stem Borer without spraying chemicals.",
+      tags: ["Traps", "IPM", "Pest"],
+      image: "/agariaid_img1.jpg"
+    },
+    { id: 202, title: "Identifying Common Rice Pests", category: "Pest Management", author: "CropDoc", readTime: "11 min", excerpt: "Visual guide to BPH, Stem Borer, and Leaf Folder.", tags: ["Rice", "Pests"] },
+
+    // Water Management
+    {
+      id: 301,
+      title: "Cost-Effective Drip Irrigation Setup",
+      category: "Water Management",
+      author: "WaterWise",
+      date: "Feb 12, 2026",
+      readTime: "16 min",
+      excerpt: "Save 70% water while increasing yield for small orchards.",
+      tags: ["Irrigation", "Savings", "Drip"],
+      image: "/agariaid_img2.jpg"
+    },
+
+    // Soil Health
     {
       id: 4,
       title: "Mulching Techniques and Their Benefits in Agriculture",
@@ -82,100 +186,9 @@ export default function KnowledgeBase() {
       likes: 198,
       excerpt: "Plastic vs. Organic mulching—which one should you choose? A detailed comparison on cost-effectiveness and impact on soil microbial life.",
       tags: ["Mulching", "Organic", "WaterSaving"],
-      image: "/public/img_4.webp",
+      image: "/img_4.webp",
       url: "https://krishijagran.com/featured/shree-anna-millets-to-bring-prosperity-to-farmers-and-people/"
     },
-
-    // Organic Farming (10 Articles)
-    {
-      id: 101,
-      title: "Vermicompost Preparation: A Step-by-Step Guide",
-      category: "Organic Farming",
-      author: "Priya Sharma",
-      date: "Feb 01, 2026",
-      readTime: "8 min",
-      excerpt: "Learn how to turn farm waste into 'Black Gold' using earthworms. Perfect for small scale organic farmers.",
-      tags: ["Organic", "Compost", "WasteManagement"],
-      image: "/assets/ag5.png",
-      url: "https://krishijagran.com/news/how-to-make-vermicompost/"
-    },
-    {
-      id: 102,
-      title: "Natural Pest Control: The Power of Neem Oil",
-      category: "Organic Farming",
-      author: "Dr. Anil Verma",
-      date: "Feb 05, 2026",
-      readTime: "6 min",
-      excerpt: "Neem oil is a versatile organic pesticide. Discover the correct mixing ratios for different crops.",
-      tags: ["Neem", "PestControl", "Natural"],
-      image: "/assets/ag6.png",
-      url: "https://krishijagran.com/blog/zytonic-neem-a-natural-and-sustainable-solution-for-pest-control-in-crops/"
-    },
-    {
-      id: 103,
-      title: "Green Manuring: Enriching Soil Naturally",
-      category: "Organic Farming",
-      author: "Rajesh Kumar",
-      date: "Jan 20, 2026",
-      readTime: "12 min",
-      excerpt: "Using crops like Dhaincha to restore soil nitrogen without chemical fertilizers.",
-      tags: ["GreenManure", "SoilHealth", "Organic"],
-      image: "src/assets/ag7.png",
-      url: "https://krishijagran.com/agriculture-world/earthworms-can-enrich-soil-far-more-quickly-than-previously-imagined/"
-    },
-    { id: 104, title: "Bio-Fertilizers vs Chemical: Why Organic Wins", category: "Organic Farming", author: "Dr. S. Singh", readTime: "15 min", excerpt: "A detailed scientific comparison of long-term soil productivity.", tags: ["Science", "Organic"] },
-    { id: 105, title: "Traditional Indian Farming Wisdom", category: "Organic Farming", author: "Vedic Agri", readTime: "20 min", excerpt: "Reviving ancient techniques for modern sustainable yields.", tags: ["History", "Tradition"] },
-    { id: 106, title: "Seed Treatment with Beejamrit", category: "Organic Farming", author: "ZBNF Expert", readTime: "5 min", excerpt: "Protect your seeds from soil-borne diseases naturally.", tags: ["Seeds", "ZBNF"] },
-    { id: 107, title: "Kitchen Gardening for Beginners", category: "Organic Farming", author: "HomeGrow", readTime: "10 min", excerpt: "Grow organic vegetables in your backyard with minimal cost.", tags: ["Gardening", "Beginner"] },
-    { id: 108, title: "Organic Certification Process in India", category: "Organic Farming", author: "NPOP", readTime: "25 min", excerpt: "Step-by-step guide to getting your farm certified for export.", tags: ["Legal", "Export"] },
-    { id: 109, title: "Companion Planting: Natural Synergy", category: "Organic Farming", author: "EcoFarmer", readTime: "8 min", excerpt: "Which crops to grow together to repel pests naturally.", tags: ["Synergy", "Nature"] },
-    { id: 110, title: "The Role of Microbes in Organic Soil", category: "Organic Farming", author: "BioLab", readTime: "14 min", excerpt: "Understanding the invisible workforce in your fields.", tags: ["Microbes", "Soil"] },
-
-    // Pest Management (10 Articles)
-    {
-      id: 201,
-      title: "Pheromone Traps: Smart Pest Monitoring",
-      category: "Pest Management",
-      author: "AgriScientist",
-      date: "Jan 15, 2026",
-      readTime: "9 min",
-      excerpt: "Track and trap pests like Stem Borer without spraying chemicals.",
-      tags: ["Traps", "IPM", "Pest"],
-      image: "https://images.unsplash.com/photo-1589923188900-85dae523342b?auto=format&fit=crop&q=80&w=800"
-    },
-    { id: 202, title: "Identifying Common Rice Pests", category: "Pest Management", author: "CropDoc", readTime: "11 min", excerpt: "Visual guide to BPH, Stem Borer, and Leaf Folder.", tags: ["Rice", "Pests"] },
-    { id: 203, title: "Integrated Pest Management (IPM) Basics", category: "Pest Management", author: "GovtAgri", readTime: "18 min", excerpt: "Combining biological, mechanical, and chemical methods.", tags: ["IPM", "Guide"] },
-    { id: 204, title: "Biological Control: Ladybugs and Lacewings", category: "Pest Management", author: "NatureGuard", readTime: "7 min", excerpt: "How beneficial insects protect your crops.", tags: ["Insects", "Nature"] },
-    { id: 205, title: "Safe Pesticide Application Rules", category: "Pest Management", author: "SafetyFirst", readTime: "10 min", excerpt: "Dos and don'ts for handling toxic chemicals.", tags: ["Safety", "Chemicals"] },
-    { id: 206, title: "Fungal Disease Control in Wheat", category: "Pest Management", author: "WheatWatch", readTime: "13 min", excerpt: "Managing Rust and Smut diseases effectively.", tags: ["Wheat", "Disease"] },
-    { id: 207, title: "Understanding Insect Life Cycles", category: "Pest Management", author: "BioStudy", readTime: "15 min", excerpt: "Why timing is crucial for effective pest control.", tags: ["Education", "Insects"] },
-    { id: 208, title: "Trap Crops: Distracting the Enemy", category: "Pest Management", author: "BorderGuard", readTime: "6 min", excerpt: "Using marigold and other crops to protect your main harvest.", tags: ["Strategy", "Plants"] },
-    { id: 209, title: "Light Traps for Nocturnal Pests", category: "Pest Management", author: "NightWatch", readTime: "8 min", excerpt: "Simple tech to reduce moth populations at night.", tags: ["Tech", "Moths"] },
-    { id: 210, title: "Managing Locust Swarms", category: "Pest Management", author: "GlobalAlert", readTime: "20 min", excerpt: "Coordinated efforts to fight the devastating desert locust.", tags: ["Locust", "Emergency"] },
-
-    // Water Management (10 Articles)
-    {
-      id: 301,
-      title: "Cost-Effective Drip Irrigation Setup",
-      category: "Water Management",
-      author: "WaterWise",
-      date: "Feb 12, 2026",
-      readTime: "16 min",
-      excerpt: "Save 70% water while increasing yield for small orchards.",
-      tags: ["Irrigation", "Savings", "Drip"],
-      image: "https://images.unsplash.com/photo-1563514227147-6d2ff665a6a0?auto=format&fit=crop&q=80&w=800"
-    },
-    { id: 302, title: "Rainwater Harvesting on the Farm", category: "Water Management", author: "EcoEngineer", readTime: "22 min", excerpt: "Building farm ponds and recharge wells.", tags: ["Rainwater", "Storage"] },
-    { id: 303, title: "Sprinkler vs Drip: Which is better?", category: "Water Management", author: "AgriCompare", readTime: "10 min", excerpt: "Selecting the right irrigation method for your terrain.", tags: ["Tech", "Comparison"] },
-    { id: 304, title: "Mulching for Moisture Retention", category: "Water Management", author: "SoilExpert", readTime: "7 min", excerpt: "Reducing evaporation loss by 40%.", tags: ["Mulch", "Evaporation"] },
-    { id: 305, title: "Soil Moisture Testing Tools", category: "Water Management", author: "DigitalFarmer", readTime: "12 min", excerpt: "Low-cost sensors to know when to water.", tags: ["IoT", "Sensors"] },
-    { id: 306, title: "Watering Schedules for Vegetables", category: "Water Management", author: "VeggiePro", readTime: "5 min", excerpt: "Morning vs Evening: Best times for different plants.", tags: ["Schedules", "Veg"] },
-    { id: 307, title: "Drought Resistant Crop Varieties", category: "Water Management", author: "ClimateRes", readTime: "15 min", excerpt: "Seeds that survive with minimal irrigation.", tags: ["Seeds", "Drought"] },
-    { id: 308, title: "Watershed Management Basics", category: "Water Management", author: "CommAgri", readTime: "18 min", excerpt: "Community efforts to save water for everyone.", tags: ["Community", "Watershed"] },
-    { id: 309, title: "Laser Land Leveling Benefits", category: "Water Management", author: "ModernFarmer", readTime: "9 min", excerpt: "Ensuring uniform water distribution across the field.", tags: ["Tech", "Leveling"] },
-    { id: 310, title: "Cleaning Irrigation Canals", category: "Water Management", author: "Maintenance", readTime: "6 min", excerpt: "Reducing water loss due to seepage and weeds.", tags: ["Canals", "Seepage"] },
-
-    // Soil Health (10 Articles)
     {
       id: 401,
       title: "Understanding Soil pH for Beginners",
@@ -185,19 +198,10 @@ export default function KnowledgeBase() {
       readTime: "10 min",
       excerpt: "How acidity or alkalinity affects nutrient absorption.",
       tags: ["pH", "Basics", "Soil"],
-      image: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&q=80&w=800"
+      image: "/agariaid_img3.jpg"
     },
-    { id: 402, title: "NPK Balance: The Core of Fertilization", category: "Soil Health", author: "ChemFree", readTime: "14 min", excerpt: "Reading soil test reports and applying right nutrients.", tags: ["Nutrients", "Fertility"] },
-    { id: 403, title: "The Role of Earthworms in Soil", category: "Soil Health", author: "NatureLover", readTime: "8 min", excerpt: "Natural tillers that improve soil structure.", tags: ["Earthworms", "Nature"] },
-    { id: 404, title: "Soil Erosion Control Techniques", category: "Soil Health", author: "LandCare", readTime: "20 min", excerpt: "Preventing topsoil loss during heavy rains.", tags: ["Erosion", "Prevention"] },
-    { id: 405, title: "Cover Crops: Protecting the Ground", category: "Soil Health", author: "EcoAgri", readTime: "11 min", excerpt: "Growing crops specifically to feed and protect the soil.", tags: ["CoverCrops", "Health"] },
-    { id: 406, title: "Managing Soil Salinity", category: "Soil Health", author: "SalineFix", readTime: "15 min", excerpt: "Reclaiming land affected by salt accumulation.", tags: ["Salinity", "Reclamation"] },
-    { id: 407, title: "Importance of Soil Organic Carbon", category: "Soil Health", author: "CarbonLab", readTime: "13 min", excerpt: "The hidden metric that determines long-term fertility.", tags: ["Carbon", "Organic"] },
-    { id: 408, title: "Micronutrients: Small but Mighty", category: "Soil Health", author: "ZincWatch", readTime: "9 min", excerpt: "Why Boron, Zinc, and Iron are essential for yield.", tags: ["Micronutrients", "Yield"] },
-    { id: 409, title: "Deep Plowing Pros and Cons", category: "Soil Health", author: "TillageInfo", readTime: "7 min", excerpt: "When to break the hardpan and when to avoid it.", tags: ["Tillage", "Hardpan"] },
-    { id: 410, title: "Visiting a Soil Testing Lab", category: "Soil Health", author: "GuideDoc", readTime: "6 min", excerpt: "What happens to your soil sample inside the lab.", tags: ["Testing", "Lab"] },
 
-    // Climate (10 Articles)
+    // Climate
     {
       id: 501,
       title: "Predicting Monsoons: Tech for Farmers",
@@ -207,18 +211,156 @@ export default function KnowledgeBase() {
       readTime: "11 min",
       excerpt: "Using satellite data and apps to plan your sowing season.",
       tags: ["Monsoon", "Weather", "App"],
-      image: "https://images.unsplash.com/photo-1530908295418-a12e326966ba?auto=format&fit=crop&q=80&w=800"
+      image: "/agariaid_img4.jpg"
     },
     { id: 502, title: "Protecting Crops from Heatwaves", category: "Climate", author: "Summertime", readTime: "9 min", excerpt: "Immediate steps to save thirsty plants during extreme heat.", tags: ["Heatwave", "Summer"] },
-    { id: 503, title: "Frost Management in Winter Crops", category: "Climate", author: "ColdGuard", readTime: "10 min", excerpt: "Using irrigation and smoke to prevent frost damage.", tags: ["Winter", "Frost"] },
-    { id: 504, title: "Climate-Resilient Rice Varieties", category: "Climate", author: "RiceRes", readTime: "14 min", excerpt: "Seeds that survive floods and drought alike.", tags: ["Rice", "Resilience"] },
-    { id: 505, title: "Greenhouse Farming Benefits", category: "Climate", author: "GlassGrow", readTime: "18 min", excerpt: "Controlling the environment for high-value exotic crops.", tags: ["Greenhouse", "Tech"] },
-    { id: 506, title: "Adapting to Changing Rainfall Patterns", category: "Climate", author: "RainSense", readTime: "15 min", excerpt: "Shifting sowing dates to match current climate shifts.", tags: ["Rainfall", "Adaptation"] },
-    { id: 507, title: "Carbon Footprint of Your Farm", category: "Climate", author: "EcoSmart", readTime: "12 min", excerpt: "Reducing methane and nitrous oxide emissions.", tags: ["Carbon", "Emission"] },
-    { id: 508, title: "Renewable Energy in Agriculture", category: "Climate", author: "SolarAgri", readTime: "20 min", excerpt: "Using solar pumps and wind energy to power farms.", tags: ["Solar", "Energy"] },
-    { id: 509, title: "Predicting Pest Outbreaks using Climate Data", category: "Climate", author: "BioAI", readTime: "16 min", excerpt: "How humidity and temp determine pest pressure.", tags: ["AI", "PestForecast"] },
-    { id: 510, title: "Global Warming Impacts on Wheat Yield", category: "Climate", author: "AgriFuture", readTime: "22 min", excerpt: "The long-term threat to our food security and how to fight it.", tags: ["Wheat", "GlobalWarming"] },
   ];
+
+  const allArticles = [...customArticles, ...defaultArticles].map(art => ({
+    ...art,
+    displayImage: art.imageUrl || art.image || "/agriaid_logo.jpg"
+  }));
+  const isAdmin = user?.role === "admin" || user?.email === "admin@gmail.com";
+
+  console.log("👤 Current user object:", user);
+  console.log("✅ isAdmin check:", isAdmin, "| user?.role:", user?.role);
+
+  const handleArticleFormChange = (field, value) => {
+    setArticleForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleFileChange = (e) => {
+    if (e.target.files[0]) {
+      setImageFile(e.target.files[0]);
+    }
+  };
+
+  const handleAdminUpload = async (event) => {
+    event.preventDefault();
+
+    if (!isAdmin) {
+      toast.error("Only admin can upload articles.");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+
+      const formData = new FormData();
+      formData.append("title", articleForm.title);
+      formData.append("category", articleForm.category);
+      formData.append("author", articleForm.author);
+      formData.append("readTime", articleForm.readTime);
+      formData.append("excerpt", articleForm.excerpt);
+      formData.append("url", articleForm.url);
+
+      const tags = typeof articleForm.tags === 'string'
+        ? articleForm.tags.split(",").map((tag) => tag.trim()).filter(Boolean)
+        : articleForm.tags;
+
+      formData.append("tags", JSON.stringify(tags));
+
+      if (imageFile) {
+        formData.append("image", imageFile);
+      } else {
+        formData.append("imageUrl", articleForm.imageUrl);
+      }
+
+      const url = editingArticleId
+        ? `${API_URL}/api/articles/${editingArticleId}`
+        : `${API_URL}/api/articles`;
+
+      const method = editingArticleId ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          // Note: Don't set Content-Type, fetch will set it for FormData
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Article save failed");
+      }
+
+      if (editingArticleId) {
+        setCustomArticles((prev) =>
+          prev.map((art) => art._id === editingArticleId ? data.article : art)
+        );
+        toast.success("Article updated successfully!");
+      } else {
+        setCustomArticles((prev) => [data.article, ...prev]);
+        toast.success("Article uploaded successfully!");
+      }
+
+      setArticleForm({
+        title: "",
+        category: "Technology",
+        author: "Admin",
+        readTime: "5 min",
+        excerpt: "",
+        tags: "",
+        imageUrl: "",
+        url: "",
+      });
+      setImageFile(null);
+      setEditingArticleId(null);
+      setShowUploadForm(false);
+    } catch (error) {
+      toast.error(error.message || "Save failed");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEditClick = (article, e) => {
+    e.stopPropagation();
+    setEditingArticleId(article._id);
+    setArticleForm({
+      title: article.title,
+      category: article.category,
+      author: article.author,
+      readTime: article.readTime,
+      excerpt: article.excerpt,
+      tags: Array.isArray(article.tags) ? article.tags.join(", ") : article.tags,
+      imageUrl: article.imageUrl,
+      url: article.url,
+    });
+    setImageFile(null);
+    setShowUploadForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDeleteClick = async (id, e) => {
+    e.stopPropagation();
+    if (!window.confirm("Are you sure you want to delete this article?")) return;
+
+    try {
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+      const response = await fetch(`${API_URL}/api/articles/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        setCustomArticles((prev) => prev.filter((art) => (art._id || art.id) !== id));
+        toast.success("Article deleted successfully!");
+      } else {
+        const data = await response.json();
+        throw new Error(data.message || "Delete failed");
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
   const handleArticleClick = (url) => {
     if (url) {
@@ -251,13 +393,56 @@ export default function KnowledgeBase() {
     },
   ];
 
+  const handleClearAll = async () => {
+    if (!window.confirm("Are you sure you want to delete ALL articles from the database? This cannot be undone.")) return;
+    
+    try {
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+      const response = await fetch(`${API_URL}/api/articles/clear-all`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        setCustomArticles([]);
+        toast.success("All database articles cleared!");
+      } else {
+        toast.error("Failed to clear articles.");
+      }
+    } catch (error) {
+      console.error("Clear all failed:", error);
+      toast.error("Error clearing articles.");
+    }
+  };
+
+  const filteredArticles = (() => {
+    // 1. First filter by search query
+    const searched = allArticles.filter(article => {
+      const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        article.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        article.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+      return matchesSearch;
+    });
+
+    // 2. If a specific category is selected, filter by that category
+    if (selectedCategory !== "All Articles") {
+      return searched.filter(a => a.category === selectedCategory);
+    }
+
+    // 3. For "All Articles", show everything that matches the search
+    return searched;
+  })();
+
   const categories = [
-    { name: "All Articles", count: articles.length, icon: BookOpen },
-    { name: "Organic Farming", count: articles.filter(a => a.category === "Organic Farming").length, icon: BookOpen },
-    { name: "Pest Management", count: articles.filter(a => a.category === "Pest Management").length, icon: BookOpen },
-    { name: "Water Management", count: articles.filter(a => a.category === "Water Management").length, icon: BookOpen },
-    { name: "Soil Health", count: articles.filter(a => a.category === "Soil Health").length, icon: BookOpen },
-    { name: "Climate", count: articles.filter(a => a.category === "Climate").length, icon: BookOpen },
+    { name: "All Articles", count: allArticles.length, icon: LayoutGrid },
+    { name: "Technology", count: allArticles.filter(a => a.category === "Technology").length, icon: TrendingUp },
+    { name: "Organic Farming", count: allArticles.filter(a => a.category === "Organic Farming").length, icon: BookOpen },
+    { name: "Pest Management", count: allArticles.filter(a => a.category === "Pest Management").length, icon: FileText },
+    { name: "Water Management", count: allArticles.filter(a => a.category === "Water Management").length, icon: Droplets },
+    { name: "Soil Health", count: allArticles.filter(a => a.category === "Soil Health").length, icon: Sprout },
+    { name: "Climate", count: allArticles.filter(a => a.category === "Climate").length, icon: Clock },
   ];
 
   const trendingTopics = [
@@ -269,14 +454,6 @@ export default function KnowledgeBase() {
     "Crop Insurance"
   ];
 
-  const filteredArticles = articles.filter(article => {
-    const matchesCategory = selectedCategory === "All Articles" || article.category === selectedCategory;
-    const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      article.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      article.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchesCategory && matchesSearch;
-  });
-
   const filteredFaqs = faqs.filter(faq =>
     faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
     faq.answer.toLowerCase().includes(searchQuery.toLowerCase())
@@ -285,6 +462,168 @@ export default function KnowledgeBase() {
   return (
     <div className="min-h-screen kb-hero-gradient py-12">
       <div className="container mx-auto px-4 max-w-7xl">
+        {isAdmin && (
+          <div className="mb-8 flex justify-between items-center bg-white/40 p-4 rounded-3xl border border-green-100 backdrop-blur-sm">
+            <div className="flex items-center gap-3">
+              <div className="bg-green-600 p-2 rounded-lg">
+                <User className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-black text-gray-800">Admin Mode Active</p>
+                <p className="text-[10px] font-bold text-green-600 uppercase tracking-widest">{user?.email}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="destructive"
+                className="rounded-full px-6 py-3 font-bold shadow-lg"
+                onClick={handleClearAll}
+              >
+                Clear All DB Articles
+              </Button>
+              <Button
+                className="bg-green-600 hover:bg-green-700 text-white rounded-full px-6 py-3 shadow-lg shadow-green-100 font-bold"
+                onClick={() => setShowUploadForm((prev) => !prev)}
+              >
+                {showUploadForm ? "Close Form" : "Upload Articles"}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {isAdmin && showUploadForm && (
+          <Card className="kb-glass-card border-none mb-10 overflow-hidden">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-2xl font-black text-gray-900">
+                {editingArticleId ? "Edit Article" : "Upload Knowledge Base Article"}
+              </CardTitle>
+              <CardDescription className="text-gray-600">
+                {editingArticleId ? "Update the article details below." : "Paste the Cloudinary image URL, article link, and details here."}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleAdminUpload} className="grid md:grid-cols-2 gap-4">
+                <Input
+                  placeholder="Article title"
+                  value={articleForm.title}
+                  onChange={(event) => handleArticleFormChange("title", event.target.value)}
+                  required
+                />
+                <Input
+                  placeholder="Author name"
+                  value={articleForm.author}
+                  onChange={(event) => handleArticleFormChange("author", event.target.value)}
+                  required
+                />
+                <Input
+                  placeholder="Category"
+                  value={articleForm.category}
+                  onChange={(event) => handleArticleFormChange("category", event.target.value)}
+                  required
+                />
+                <Input
+                  placeholder="Read time e.g. 8 min"
+                  value={articleForm.readTime}
+                  onChange={(event) => handleArticleFormChange("readTime", event.target.value)}
+                  required
+                />
+                <div className="md:col-span-2">
+                  <textarea
+                    value={articleForm.excerpt}
+                    onChange={(event) => handleArticleFormChange("excerpt", event.target.value)}
+                    placeholder="Short article summary"
+                    className="w-full min-h-28 rounded-2xl border border-gray-200 bg-white/80 px-4 py-3 outline-none focus:ring-2 focus:ring-green-500 shadow-sm"
+                    required
+                  />
+                </div>
+                <Input
+                  placeholder="Tags separated by commas"
+                  value={articleForm.tags}
+                  onChange={(event) => handleArticleFormChange("tags", event.target.value)}
+                  required
+                />
+                <Input
+                  placeholder="Article URL"
+                  value={articleForm.url}
+                  onChange={(event) => handleArticleFormChange("url", event.target.value)}
+                  required
+                />
+                <div className="md:col-span-2">
+                  <div className="flex flex-col gap-2">
+                    <Label className="text-sm font-bold text-gray-700 ml-1">Article Image</Label>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="relative group">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileChange}
+                          className="hidden"
+                          id="article-image-upload"
+                        />
+                        <label
+                          htmlFor="article-image-upload"
+                          className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-200 rounded-2xl cursor-pointer hover:bg-green-50 hover:border-green-300 transition-all group"
+                        >
+                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <div className="p-3 bg-green-100 rounded-xl mb-2 group-hover:scale-110 transition-transform">
+                              <Video className="w-6 h-6 text-green-600" />
+                            </div>
+                            <p className="text-xs font-bold text-gray-500">
+                              {imageFile ? imageFile.name : "Click to upload article image"}
+                            </p>
+                          </div>
+                        </label>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Input
+                          placeholder="OR paste Image URL"
+                          value={articleForm.imageUrl}
+                          onChange={(event) => handleArticleFormChange("imageUrl", event.target.value)}
+                        />
+                        {(imageFile || articleForm.imageUrl) && (
+                          <div className="h-20 w-full rounded-xl overflow-hidden border border-gray-100">
+                            <img
+                              src={imageFile ? URL.createObjectURL(imageFile) : articleForm.imageUrl}
+                              alt="Preview"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="md:col-span-2 flex justify-end gap-3">
+                  {editingArticleId && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setEditingArticleId(null);
+                        setShowUploadForm(false);
+                        setArticleForm({
+                          title: "", category: "Technology", author: "Admin", readTime: "5 min",
+                          excerpt: "", tags: "", imageUrl: "", url: "",
+                        });
+                      }}
+                      className="rounded-full px-8 py-3 font-bold"
+                    >
+                      Cancel
+                    </Button>
+                  )}
+                  <Button
+                    type="submit"
+                    className="bg-green-600 hover:bg-green-700 text-white rounded-full px-8 py-3 font-bold shadow-lg shadow-green-100"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Saving..." : (editingArticleId ? "Update Article" : "Save Article")}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Header Section */}
         <div className="flex flex-col md:flex-row items-center justify-between mb-12 gap-8 animate-kb-fade-in">
           <div className="text-center md:text-left">
@@ -410,13 +749,33 @@ export default function KnowledgeBase() {
                         className="kb-glass-card border-none overflow-hidden group cursor-pointer flex flex-col h-full"
                         onClick={() => handleArticleClick(article.url)}
                       >
-                        {article.image && (
+                        {article.displayImage && (
                           <div className="w-full h-56 overflow-hidden relative">
                             <ImageWithFallback
-                              src={article.image}
+                              src={article.displayImage}
                               alt={article.title}
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                             />
+                            
+                            {isAdmin && (article._id || article.id) && (
+                              <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <Button
+                                  size="sm"
+                                  className="bg-white/90 hover:bg-white text-blue-600 rounded-xl shadow-lg backdrop-blur-sm border-none h-9 px-4 font-bold"
+                                  onClick={(e) => handleEditClick(article, e)}
+                                >
+                                  Edit
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  className="bg-red-500/90 hover:bg-red-500 text-white rounded-xl shadow-lg backdrop-blur-sm border-none h-9 px-4 font-bold"
+                                  onClick={(e) => handleDeleteClick(article._id || article.id, e)}
+                                >
+                                  Delete
+                                </Button>
+                              </div>
+                            )}
+
                             <div className="absolute top-4 left-4">
                               <Badge className="bg-white/90 backdrop-blur-md text-green-700 border-none font-bold px-3 py-1 shadow-sm">
                                 {article.category}

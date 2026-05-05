@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="800" viewBox="0 0 1400 800">
+  <style>
+    .entity{fill:#ffffff;stroke:#1b4332;stroke-width:3;}
+    .title{font-family:Arial, Helvetica, sans-serif;font-size:16px;fill:#0b3d2e;font-weight:700}
+    .attr{font-family:Arial, Helvetica, sans-serif;font-size:13px;fill:#123}
+    .relLine{stroke:#2d6a4f;stroke-width:2}
+  </style>
+
+  <text x="700" y="40" text-anchor="middle" class="title">Entity Relationship Diagram (ERD)</text>
+
+  <!-- User -->
+  <g transform="translate(80,120)">
+    <rect class="entity" x="0" y="0" width="360" height="140" rx="10" />
+    <text class="title" x="180" y="28" text-anchor="middle">User</text>
+    <text class="attr" x="20" y="54">• userId (PK)</text>
+    <text class="attr" x="20" y="74">• name</text>
+    <text class="attr" x="20" y="94">• email</text>
+    <text class="attr" x="20" y="114">• phone</text>
+  </g>
+
+  <!-- Prediction -->
+  <g transform="translate(520,120)">
+    <rect class="entity" x="0" y="0" width="360" height="160" rx="10" />
+    <text class="title" x="180" y="28" text-anchor="middle">Prediction</text>
+    <text class="attr" x="20" y="54">• predictionId (PK)</text>
+    <text class="attr" x="20" y="74">• userId (FK)</text>
+    <text class="attr" x="20" y="94">• cropId (FK)</text>
+    <text class="attr" x="20" y="114">• diseaseId (FK)</text>
+    <text class="attr" x="20" y="134">• imageUrl, confidence, createdAt</text>
+  </g>
+
+  <!-- Crop -->
+  <g transform="translate(960,120)">
+    <rect class="entity" x="0" y="0" width="360" height="120" rx="10" />
+    <text class="title" x="180" y="28" text-anchor="middle">Crop</text>
+    <text class="attr" x="20" y="54">• cropId (PK)</text>
+    <text class="attr" x="20" y="74">• cropName</text>
+    <text class="attr" x="20" y="94">• cropType</text>
+  </g>
+
+  <!-- Disease -->
+  <g transform="translate(520,340)">
+    <rect class="entity" x="0" y="0" width="360" height="140" rx="10" />
+    <text class="title" x="180" y="28" text-anchor="middle">Disease</text>
+    <text class="attr" x="20" y="54">• diseaseId (PK)</text>
+    <text class="attr" x="20" y="74">• diseaseName</text>
+    <text class="attr" x="20" y="94">• symptoms</text>
+    <text class="attr" x="20" y="114">• remedies, severity</text>
+  </g>
+
+  <!-- ChatMessage -->
+  <g transform="translate(960,340)">
+    <rect class="entity" x="0" y="0" width="360" height="120" rx="10" />
+    <text class="title" x="180" y="28" text-anchor="middle">ChatMessage</text>
+    <text class="attr" x="20" y="54">• messageId (PK)</text>
+    <text class="attr" x="20" y="74">• userId (FK)</text>
+    <text class="attr" x="20" y="94">• question, answer, intent, timestamp</text>
+  </g>
+
+  <!-- Relations lines -->
+  <line x1="440" y1="200" x2="520" y2="200" class="relLine" />
+  <text x="480" y="188" class="attr" text-anchor="middle">1 — M</text>
+
+  <line x1="680" y1="280" x2="680" y2="340" class="relLine" />
+  <text x="700" y="310" class="attr">M — 1</text>
+
+  <line x1="840" y1="200" x2="960" y2="200" class="relLine" />
+  <text x="900" y="188" class="attr" text-anchor="middle">M — 1</text>
+
+  <line x1="680" y1="430" x2="680" y2="500" class="relLine" />
+  <text x="700" y="465" class="attr">1 — M</text>
+
+  <!-- small caption -->
+  <text x="700" y="760" text-anchor="middle" class="attr">Notes: PK = Primary Key, FK = Foreign Key. Arrows indicate cardinality examples (User 1-to-Many Predictions).</text>
+</svg>

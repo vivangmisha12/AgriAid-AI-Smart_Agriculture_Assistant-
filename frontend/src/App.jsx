@@ -33,7 +33,7 @@ function App() {
 
   return (
     <Router>
-      <div className="min-h-screen bg-[#FCF9F1] flex flex-col">
+      <div className="min-h-screen bg-[#FCF9F1] flex flex-col overflow-x-hidden">
         <Header />
         <ScrollLoginPopup />
         <Toaster position="top-right" reverseOrder={false} />

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700">
+  <style>
+    .actor{font-family:Arial, Helvetica, sans-serif;fill:#123;font-weight:700}
+    .usecase{fill:#fff;stroke:#1b4332;stroke-width:2}
+    .label{font-family:Arial, Helvetica, sans-serif;fill:#073b28;font-weight:700;font-size:16px}
+    .small{font-family:Arial, Helvetica, sans-serif;fill:#123;font-size:13px}
+    .line{stroke:#2d6a4f;stroke-width:2}
+  </style>
+
+  <text x="600" y="36" text-anchor="middle" class="label">Use Case Diagram — AgriAid</text>
+
+  <!-- Actors -->
+  <g transform="translate(60,120)">
+    <text class="actor" x="0" y="0">👨‍🌾 Farmer / User</text>
+    <rect x="-8" y="8" width="140" height="40" fill="#e6f4ea" stroke="#2d6a4f" rx="8" />
+  </g>
+
+  <g transform="translate(60,260)">
+    <text class="actor" x="0" y="0">🔧 Admin</text>
+    <rect x="-8" y="8" width="90" height="40" fill="#e6f4ea" stroke="#2d6a4f" rx="8" />
+  </g>
+
+  <!-- Use cases (ovals) -->
+  <g transform="translate(360,80)">
+    <ellipse class="usecase" cx="240" cy="60" rx="200" ry="40"/>
+    <text class="small" x="240" y="65" text-anchor="middle">Register / Login</text>
+
+    <ellipse class="usecase" cx="240" cy="150" rx="200" ry="40"/>
+    <text class="small" x="240" y="155" text-anchor="middle">Upload Image / Get Prediction</text>
+
+    <ellipse class="usecase" cx="240" cy="240" rx="200" ry="40"/>
+    <text class="small" x="240" y="245" text-anchor="middle">Ask Chatbot / Get Advice</text>
+
+    <ellipse class="usecase" cx="240" cy="330" rx="200" ry="40"/>
+    <text class="small" x="240" y="335" text-anchor="middle">View History / Dashboard</text>
+  </g>
+
+  <!-- Connections Farmer -> Use cases -->
+  <line x1="200" y1="120" x2="320" y2="100" class="line" />
+  <line x1="200" y1="160" x2="320" y2="150" class="line" />
+  <line x1="200" y1="200" x2="320" y2="200" class="line" />
+  <line x1="200" y1="240" x2="320" y2="250" class="line" />
+
+  <!-- Admin connections -->
+  <line x1="200" y1="300" x2="360" y2="340" class="line" />
+
+  <!-- caption -->
+  <text x="600" y="660" text-anchor="middle" class="small">Use cases shown reflect primary user workflows. Admin manages logs and dataset curation.</text>
+</svg>

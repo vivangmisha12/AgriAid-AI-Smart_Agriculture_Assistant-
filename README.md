@@ -11,7 +11,6 @@ Identify crop issues instantly by uploading a photo.
 - **Visual Analysis**: Uses advanced Computer Vision (GPT-4o-mini) to scan leaf images.
 - **Comprehensive Reports**: Provides identification, detailed descriptions, organic home remedies, and chemical treatment options.
 - **Multilingual Support**: Get diagnoses in **Hindi**, **English**, or **Bhojpuri**.
-- **Pro Tips**: Includes a guide for high-quality scanning (lighting, focus, etc.).
 
 ### 🤖 Agri-Expert Chatbot
 An intelligent assistant specialized strictly in agriculture.
@@ -19,15 +18,17 @@ An intelligent assistant specialized strictly in agriculture.
 - **Local Language Focus**: Full support for Hindi and Bhojpuri using pure Devanagari script.
 - **Safety First**: Refuses non-agricultural questions to ensure focused guidance.
 
+### 📚 Knowledge Base (Admin Managed)
+A dynamic library of articles managed directly via the platform.
+- **Admin Dashboard**: Authorized admins (admin@gmail.com) can **Create, Edit, and Delete** articles in real-time.
+- **Direct Image Upload**: Integrated with **Cloudinary** for seamless image management—no more manual URL copying.
+- **Category Filtering**: Organized into Technology, Organic Farming, Pest Management, Water Management, Soil Health, and Climate.
+
 ### 🌦️ Real-time Weather Alerts
 Stay ahead of the weather with localized alerts designed specifically for farming activities.
 
-### 📚 Knowledge Base & Expert Tips
-- **Crop Library**: In-depth information on major crops like Tomato, Potato, Rice, and Wheat.
-- **Specialist Guidance**: Expert-curated tips for soil health and yield optimization.
-
 ### 🔒 Secure Authentication
-Robust login and signup system to save your farm profile and consultation history.
+Robust login and signup system with role-based access control (RBAC) to protect administrative features.
 
 ---
 
@@ -35,35 +36,16 @@ Robust login and signup system to save your farm profile and consultation histor
 
 ### Frontend
 - **Framework**: [React](https://reactjs.org/) (Vite)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **State Management**: React Hooks
-- **Icons**: React Icons (Fa, Md)
-- **Components**: Custom UI components with a premium aesthetic.
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) & Vanilla CSS
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Components**: Radix UI based custom components.
 
 ### Backend
 - **Environment**: [Node.js](https://nodejs.org/) & [Express](https://expressjs.com/)
 - **Database**: [MongoDB](https://www.mongodb.com/) (Mongoose)
+- **Media Storage**: [Cloudinary](https://cloudinary.com/) (for article images)
 - **AI Integration**: [OpenRouter API](https://openrouter.ai/)
-  - **Vision**: `openai/gpt-4o-mini`
-  - **Chat**: `meta-llama/llama-3.1-8b-instruct`
-- **File Handling**: Multer (for image processing)
-
----
-
-## 📸 Disease Detection Functionality: How it Works
-
-The Disease Detection feature leverages **Neural Engine** scanning to bridge the gap between farmers and plant pathologists:
-
-1. **Upload**: The farmer takes a photo of an affected leaf or crop part and uploads it via the web interface.
-2. **Processing**: The image is securely transmitted to the backend, where it is processed into a base64 format.
-3. **AI Vision Analysis**: The image is analyzed by a Vision-Language Model. It specifically checks for:
-   - Signs of fungal, bacterial, or viral infections.
-   - Nutrient deficiencies or pest infestations.
-   - Non-agricultural content (and politely refuses if unrelated).
-4. **Actionable Output**: The system returns a structured response including:
-   - **Diagnosis**: The exact name of the disease or issue.
-   - **Remedies**: A combination of organic (natural) and chemical solutions.
-5. **Expert Advisory**: Users are encouraged to cross-verify high-value crop reports with field experts.
+- **Authentication**: JWT & BcryptJS
 
 ---
 
@@ -73,6 +55,7 @@ The Disease Detection feature leverages **Neural Engine** scanning to bridge the
 - Node.js (v16+)
 - MongoDB Atlas account
 - OpenRouter API Key
+- Cloudinary Account (for the Knowledge Base)
 
 ### Backend Setup
 1. `cd backend`
@@ -81,14 +64,22 @@ The Disease Detection feature leverages **Neural Engine** scanning to bridge the
    ```env
    PORT=5000
    MONGO_URI=your_mongodb_uri
+   JWT_SECRET=your_jwt_secret
    OPENROUTER_KEY=your_openrouter_api_key
+   CLOUDINARY_CLOUD_NAME=your_cloud_name
+   CLOUDINARY_API_KEY=your_api_key
+   CLOUDINARY_API_SECRET=your_api_secret
    ```
-4. `npm start`
+4. `npm start` (The server will automatically create a default admin: `admin@gmail.com` / `123123`)
 
 ### Frontend Setup
 1. `cd frontend`
 2. `npm install`
-3. `npm run dev`
+3. Create a `.env` file:
+   ```env
+   VITE_API_URL=http://localhost:5000
+   ```
+4. `npm run dev`
 
 ---
 

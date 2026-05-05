@@ -4,6 +4,9 @@ import dotenv from "dotenv";
 import cors from "cors";
 import fetch from "node-fetch";
 import authRoutes from "./routes/authRoutes.js";
+import articleRoutes from "./routes/articleRoutes.js";
+import User from "./models/User.js";
+import bcrypt from "bcryptjs";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
@@ -35,11 +38,31 @@ app.use(express.json());
 // MongoDB Connection
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB Connected Successfully!"))
+  .then(async () => {
+    console.log("✅ MongoDB Connected Successfully!");
+
+    const adminEmail = "admin@gmail.com";
+    const adminPassword = "123123";
+    const hashedPassword = await bcrypt.hash(adminPassword, 10);
+
+    await User.findOneAndUpdate(
+      { email: adminEmail },
+      {
+        name: "Admin",
+        email: adminEmail,
+        password: hashedPassword,
+        role: "admin",
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+
+    console.log("✅ Default admin user ready: admin@gmail.com / 123123");
+  })
   .catch((err) => console.error("❌ Connection Error:", err));
 
 // Auth Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/articles", articleRoutes);
 
 // Chatbot Route
 app.post("/api/chat", async (req, res) => {

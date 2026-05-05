@@ -7,7 +7,8 @@ const userSchema = new mongoose.Schema(
     phone: { type: String },
     location: { type: String },
     farmSize: { type: String },
-    password: { type: String, required: true }
+    password: { type: String, required: true },
+    role: { type: String, default: "user" }
   },
   { timestamps: true }
 );
