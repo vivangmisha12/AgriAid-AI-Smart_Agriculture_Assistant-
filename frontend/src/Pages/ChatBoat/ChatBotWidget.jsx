@@ -39,6 +39,59 @@ export default function Chatbot() {
     }
   }, []);
 
+  // -------------------- LISTEN FOR STORAGE CHANGES --------------------
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        try {
+          const userData = JSON.parse(storedUser);
+          setUser(userData);
+          setIsAuthenticated(true);
+          console.log("✅ User logged in:", userData.email);
+        } catch (error) {
+          console.error("Error parsing user data:", error);
+          setIsAuthenticated(false);
+        }
+      } else {
+        setIsAuthenticated(false);
+        setUser(null);
+        console.log("❌ User logged out");
+      }
+    };
+
+    // Listen for storage changes from other tabs/windows
+    window.addEventListener("storage", handleStorageChange);
+    
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  // -------------------- CHECK AUTH ON PAGE VISIBILITY CHANGE --------------------
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        // Page became visible - re-check auth
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+          try {
+            const userData = JSON.parse(storedUser);
+            setUser(userData);
+            setIsAuthenticated(true);
+            console.log("✅ Page visible - Auth checked:", userData.email);
+          } catch (error) {
+            setIsAuthenticated(false);
+          }
+        } else {
+          setIsAuthenticated(false);
+          setUser(null);
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
+
 
   // PLACEHOLDERS
   const placeholders = {
@@ -54,15 +107,44 @@ export default function Chatbot() {
 
   // -------------------- OPEN CHAT HANDLER --------------------
   const handleOpenChat = () => {
-    if (!isAuthenticated) {
+    // Re-check authentication from localStorage (in case user logged in)
+    const storedUser = localStorage.getItem("user");
+    const isCurrentlyAuthenticated = !!storedUser;
+
+    if (!isCurrentlyAuthenticated) {
       setShowLoginModal(true);
       return;
     }
+
+    // Update state if user just logged in
+    if (!isAuthenticated && storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        setUser(userData);
+        setIsAuthenticated(true);
+        console.log("✅ Auth state updated:", userData.email);
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+      }
+    }
+
     setIsOpen(true);
   };
 
   // -------------------- CLOSE LOGIN MODAL --------------------
   const closeLoginModal = () => {
+    // Re-check auth when modal closes (user might have logged in)
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        setUser(userData);
+        setIsAuthenticated(true);
+        console.log("✅ Modal closed - Auth verified:", userData.email);
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+      }
+    }
     setShowLoginModal(false);
   };
 
