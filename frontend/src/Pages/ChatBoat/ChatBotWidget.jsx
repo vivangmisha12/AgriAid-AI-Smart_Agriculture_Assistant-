@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Send, ChevronDown } from "lucide-react";
+import { Send, ChevronDown, Lock } from "lucide-react";
 import API_URL from "../../api";
 
 export default function Chatbot() {
   // -------------------- STATES --------------------
   const [isOpen, setIsOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [user, setUser] = useState(null);
   const [messages, setMessages] = useState([
     {
       id: Date.now(),
@@ -19,6 +22,23 @@ export default function Chatbot() {
   const [language, setLanguage] = useState("hi"); // hi/en/bho/pa
   const messagesEndRef = useRef(null);
 
+  // -------------------- CHECK AUTHENTICATION --------------------
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        setUser(userData);
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+        setIsAuthenticated(false);
+      }
+    } else {
+      setIsAuthenticated(false);
+    }
+  }, []);
+
 
   // PLACEHOLDERS
   const placeholders = {
@@ -32,16 +52,48 @@ export default function Chatbot() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // -------------------- OPEN CHAT HANDLER --------------------
+  const handleOpenChat = () => {
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
+    }
+    setIsOpen(true);
+  };
+
+  // -------------------- CLOSE LOGIN MODAL --------------------
+  const closeLoginModal = () => {
+    setShowLoginModal(false);
+  };
+
+  // -------------------- NAVIGATE TO LOGIN --------------------
+  const handleLoginRedirect = () => {
+    window.location.href = "/login";
+  };
+
+  // -------------------- NAVIGATE TO SIGNUP --------------------
+  const handleSignupRedirect = () => {
+    window.location.href = "/signup";
+  };
+
   // -------------------- AI RESPONSE FUNCTION --------------------
   const getAIResponse = async (msg, lang = "hi") => {
     try{
+      const token = localStorage.getItem("token");
       const response = await fetch(`${API_URL}/api/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify({ message: msg, lang}),
       });
+      
+      if (response.status === 401) {
+        alert("⚠️ सत्र समाप्त हुआ | Session expired, please login again");
+        window.location.href = "/login";
+        return "Please login again.";
+      }
       
       const data = await response.json();
       return data.reply || "Server error — please try again.";
@@ -100,7 +152,7 @@ export default function Chatbot() {
     <div>
       {!isOpen && (
         <button
-          onClick={() => setIsOpen(true)}
+          onClick={handleOpenChat}
           className="fixed bottom-6 right-6 bg-green-600 text-white p-4 rounded-full shadow-xl hover:bg-green-700 transition"
         >
           💬
@@ -168,6 +220,67 @@ export default function Chatbot() {
             >
               <Send size={18} />
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ================== LOGIN REQUIRED MODAL ================== */}
+      {showLoginModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full mx-4 p-8 text-center relative">
+            {/* Close Button - Top Right */}
+            <button
+              onClick={closeLoginModal}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-light transition"
+            >
+              ✕
+            </button>
+
+            {/* Logo/Icon */}
+            <div className="mb-6 flex justify-center">
+              <div className="w-20 h-20 bg-green-100 rounded-2xl flex items-center justify-center">
+                <svg className="w-10 h-10 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+              </div>
+            </div>
+
+            {/* Heading */}
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">Registration Required!</h2>
+
+            {/* Lock Icon */}
+            <div className="text-4xl mb-4">🔒</div>
+
+            {/* Message */}
+            <p className="text-gray-600 mb-8 text-lg">
+              This premium tool is only for registered farmers. Please log in to continue.
+            </p>
+
+            {/* Login Button */}
+            <button
+              onClick={handleLoginRedirect}
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg mb-6 transition flex items-center justify-center gap-2"
+            >
+              → Login to Continue
+            </button>
+
+            {/* Divider */}
+            <div className="mb-6">
+              <p className="text-sm text-gray-500 font-semibold mb-4">NEW TO AGRIAID?</p>
+            </div>
+
+            {/* Signup Link */}
+            <button
+              onClick={handleSignupRedirect}
+              className="w-full border-2 border-green-600 text-green-600 hover:bg-green-50 font-bold py-3 px-4 rounded-lg mb-6 transition flex items-center justify-center gap-2"
+            >
+              👤 Create Account
+            </button>
+
+            {/* Footer Text */}
+            <p className="text-sm text-gray-500 italic">
+              AgriAid is better when you're logged in.
+            </p>
           </div>
         </div>
       )}

@@ -5,6 +5,7 @@ import cors from "cors";
 import fetch from "node-fetch";
 import authRoutes from "./routes/authRoutes.js";
 import articleRoutes from "./routes/articleRoutes.js";
+import { protect } from "./middleware/authMiddleware.js";
 import User from "./models/User.js";
 import bcrypt from "bcryptjs";
 import multer from "multer";
@@ -64,8 +65,8 @@ mongoose
 app.use("/api/auth", authRoutes);
 app.use("/api/articles", articleRoutes);
 
-// Chatbot Route
-app.post("/api/chat", async (req, res) => {
+// ✨ Chatbot Route — PROTECTED (Login Required)
+app.post("/api/chat", protect, async (req, res) => {
   try {
     const { message, lang } = req.body;
 

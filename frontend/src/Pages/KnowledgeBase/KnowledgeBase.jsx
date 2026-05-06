@@ -395,7 +395,7 @@ export default function KnowledgeBase() {
 
   const handleClearAll = async () => {
     if (!window.confirm("Are you sure you want to delete ALL articles from the database? This cannot be undone.")) return;
-    
+
     try {
       const token = localStorage.getItem("token") || sessionStorage.getItem("token");
       const response = await fetch(`${API_URL}/api/articles/clear-all`, {
@@ -756,7 +756,7 @@ export default function KnowledgeBase() {
                               alt={article.title}
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                             />
-                            
+
                             {isAdmin && (article._id || article.id) && (
                               <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                 <Button
