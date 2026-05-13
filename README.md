@@ -83,6 +83,6 @@ Robust login and signup system with role-based access control (RBAC) to protect 
 
 ---
 ## Live Link : 
-https://vercel.com/vivang-mishras-projects/agri-aid-ai-smart-agriculture-assistant
+https://agriaid-ai.vercel.app/
 ## 📄 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
